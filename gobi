@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PLATFORMS=(iPhoneSimulator iPhoneOS)
+PLATFORMS=(iPhoneSimulator)
 
 SOURCES=""
 PRODUCTS=""
@@ -26,24 +26,27 @@ iPhoneOS32=armv7
 iPhoneSimulator64=x86_64
 iPhoneSimulator32=i386
 
-for BITS in 32 64
+for BITS in 64
 do
 	for PLATFORM in ${PLATFORMS[@]}
 	do
 		OUTPUT=$PLATFORM-$BITS
-		SDK=/Applications/Xcode.app/Contents/Developer/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}.sdk/
+    SDK=/Applications/Xcode.app/Contents/Developer/Platforms/${PLATFORM}.platform/Developer/SDKs/${PLATFORM}.sdk/
 		TOOLCHAIN_DIR=/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin
 		OCAML_COMPILER=$(pwd)/bin/ocaml-$PLATFORM-${BITS}/release
 		OCAML_ASMRUN_LIB=$OCAML_COMPILER/lib/ocaml/libasmrun
-		ARCH=$PLATFORM$BITS
-		ARCH=${!ARCH}
-		$OCAML_COMPILER/bin/ocamlopt $SOURCES -output-obj -o ${PRODUCT}.o
+    CFLAGS="-isysroot $SDK -isystem $OCAML_COMPILER/lib/ocaml -DCAML_NAME_SPACE -fno-objc-arc -miphoneos-version-min=9.3 -I/Users/benjamin/Desktop/gobi/OCamlTest/OCamlTest"
+    CC="$TOOLCHAIN_DIR/clang -arch x86_64"
+    PRODUCT2=$(pwd)/_build/tmp/$OUTPUT-bindings
+    $CC $CFLAGS -c -o ${PRODUCT2}.o bindings.m
 		PRODUCT=$(pwd)/_build/tmp/$OUTPUT
+		$OCAML_COMPILER/bin/ocamlopt $SOURCES -output-obj -o ${PRODUCT}.o
 		cp ${OCAML_ASMRUN_LIB}.a ${PRODUCT}.a
-		ar -r ${PRODUCT}.a ${PRODUCT}.o
-		PRODUCTS="$PRODUCTS ${PRODUCT}.a" 
+		ar -r ${PRODUCT}.a ${PRODUCT}.o ${PRODUCT2}.o
+		PRODUCTS="$PRODUCTS ${PRODUCT}.a"
 	done
 done
 
-lipo -create $PRODUCTS -o build/libGobi.a || exit $?
+# PRODUCTS="$PRODUCTS libtgles2.a"
 
+lipo -create $PRODUCTS -o _build/libGobi.a || exit $?
