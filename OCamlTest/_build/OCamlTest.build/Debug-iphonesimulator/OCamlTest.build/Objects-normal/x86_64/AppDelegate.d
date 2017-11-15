@@ -1,3 +1,3 @@
 dependencies: \
-  /Users/benjamin/Desktop/gobi/OCamlTest/OCamlTest/AppDelegate.m \
-  /Users/benjamin/Desktop/gobi/OCamlTest/OCamlTest/AppDelegate.h
+  /Users/benjamin/Desktop/reasongl-ios/OCamlTest/OCamlTest/AppDelegate.m \
+  /Users/benjamin/Desktop/reasongl-ios/OCamlTest/OCamlTest/AppDelegate.h

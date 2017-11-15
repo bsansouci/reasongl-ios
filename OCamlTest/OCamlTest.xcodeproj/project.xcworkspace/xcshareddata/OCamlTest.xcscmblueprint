@@ -9,8 +9,8 @@
   },
   "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "7A3F09D0-3E9C-4C79-B357-E8902CA475E9",
   "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
-    "61BBD15622E96048305185FEA7CDC0BB1B536343" : "gobi\/bin\/ocaml-iPhoneSimulator-64\/",
-    "8E05851A0CC76F451431915BBC433AA850D431F2" : "gobi\/"
+    "61BBD15622E96048305185FEA7CDC0BB1B536343" : "reasongl-ios\/bin\/ocaml-iPhoneSimulator-64\/",
+    "8E05851A0CC76F451431915BBC433AA850D431F2" : "reasongl-ios\/"
   },
   "DVTSourceControlWorkspaceBlueprintNameKey" : "OCamlTest",
   "DVTSourceControlWorkspaceBlueprintVersion" : 204,
