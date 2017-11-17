@@ -377,9 +377,9 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/OCamlTest",
-					"\"$(SRCROOT)/../\"",
+					"\"$(SRCROOT)/../Build\"",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.wokalski.OCamlTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sansouci.Reasongl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SYMROOT = _build;
@@ -400,9 +400,9 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/OCamlTest",
-					"\"$(SRCROOT)/../\"",
+					"\"$(SRCROOT)/../Build\"",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.wokalski.OCamlTest;
+				PRODUCT_BUNDLE_IDENTIFIER = com.sansouci.Reasongl;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
 				SYMROOT = _build;
