@@ -24,8 +24,6 @@ extern void doUpdate(GameViewController *this);
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
-	self.preferredFramesPerSecond = 60;
-	
 	doReasonThingsWithSelf(self);
 }
 

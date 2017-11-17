@@ -487,8 +487,8 @@ let gl_vertex_program_two_side = 34371;
 
 /*external enable : int => unit = "TglEnable";
 
-external disable : int => unit = "TglDisable";*/
-
+*/
+external disable : int => unit = "TglDisable" [@@noalloc];
 let gl_zero = 0;
 
 let gl_one = 1;
@@ -659,7 +659,8 @@ type uniformT;
 
 
 
-external uniform1f : location::uniformT => val::float => unit = "TglUniform1f";*/
+*/
+
 
 let gl_stream_draw = 35040;
 
@@ -802,11 +803,14 @@ external makeContext : openGLT => option contextT = "newEAGLContext";
 
 type _GLKViewT;
 
-external setContext : 'GLKViewT => contextT => unit = "setContext";
+external setContext : 'GLKViewT => contextT => unit = "setContext" [@@noalloc];
+external setPreferredFramesPerSecond : 'GLKViewT => int => unit = "setPreferredFramesPerSecond" [@@noalloc];
 
 external getView : gameViewControllerT => _GLKViewT = "getGLKView";
 
-external setDrawableDepthFormat : _GLKViewT => _GLKViewDrawableDepthFormatT => unit = "setDrawableDepthFormat";
+external setDrawableDepthFormat : _GLKViewT => _GLKViewDrawableDepthFormatT => unit = "setDrawableDepthFormat" [@@noalloc];
+
+
 
 /*external isNil : 'a => bool = "isNil";*/
 
@@ -816,9 +820,9 @@ external setDrawableDepthFormat : _GLKViewT => _GLKViewDrawableDepthFormatT => u
 external genTextures : context::contextT => int => array textureT = "TglGenTextures";
 
 external genTexture : context::contextT => textureT = "TglGenTexture";*/
-external blendFunc : context::contextT => sfactor::int => dfactor::int => unit = "TglBlendFunc";
+external blendFunc : context::contextT => sfactor::int => dfactor::int => unit = "TglBlendFunc" [@@noalloc];
 
-external setCurrentContext : contextT => unit = "setCurrentContext";
+external setCurrentContext : contextT => unit = "setCurrentContext" [@@noalloc];
 
 /* type programT; */
 /* external glCreateProgram : unit => programT = "glCreateProgramwrapper"; */
@@ -835,9 +839,9 @@ type programT;
 
 type shaderT;
 
-external clear : context::contextT => int => unit = "TglClear";
+external clear : context::contextT => int => unit = "TglClear" [@@noalloc];
 
-external viewport : context::contextT => x::int => y::int => width::int => height::int => unit = "TglViewport";
+external viewport : context::contextT => x::int => y::int => width::int => height::int => unit = "TglViewport" [@@noalloc];
 
 /* external clearColor : context::contextT => r::float => g::float => b::float => a::float => unit = "clearColor"; */
 external createProgram : context::contextT => programT = "TglCreateProgram";
@@ -860,7 +864,8 @@ external getShaderInfoLog : context::contextT => shader::shaderT => string = "Tg
 external getProgramInfoLog : context::contextT => program::programT => string = "TglGetProgramInfoLog";
 
 type uniformT;
-external uniform1i : context::contextT => location::uniformT => value::int => unit = "TglUniform1i";
+external uniform1f : location::uniformT => val::float => unit = "TglUniform1f"[@@noalloc];
+external uniform1i : context::contextT => location::uniformT => value::int => unit = "TglUniform1i" [@@noalloc];
 external getUniformLocation : context::contextT => program::programT => name::string => uniformT = "TglGetUniformLocation";
 
 type _GLKVertexAttrib =
@@ -870,13 +875,13 @@ type _GLKVertexAttrib =
   | GLKVertexAttribTexCoord0
   | GLKVertexAttribTexCoord1;
 
-external enable : context::contextT => int => unit = "TglEnable";
+external enable : context::contextT => int => unit = "TglEnable" [@@noalloc];
 
 type vertexArrayT;
 
 external genVertexArray : context::contextT => vertexArrayT = "TglGenVertexArrayOES";
 
-external bindVertexArray : context::contextT => vertexArray::vertexArrayT => unit = "TglBindVertexArrayOES";
+external bindVertexArray : context::contextT => vertexArray::vertexArrayT => unit = "TglBindVertexArrayOES" [@@noalloc];
 
 /*let bindVertexArray ::context vertexArray::(vertexArray: vertexArrayT) =>
   _bindVertexArray ::context ::vertexArray;*/
@@ -888,11 +893,11 @@ type bufferT;
 type attributeT;
 
 external uniformMatrix4fv : 
-  context::contextT => location::uniformT => transpose::bool => value::'a => unit = "TglUniformMatrix4fv";
+  context::contextT => location::uniformT => transpose::bool => value::'a => unit = "TglUniformMatrix4fv"[@@noalloc];
 
 external createBuffer : context::contextT => int => array bufferT = "TglGenBuffers";
 
-external bindBuffer : context::contextT => target::int => buffer::bufferT => unit = "TglBindBuffer";
+external bindBuffer : context::contextT => target::int => buffer::bufferT => unit = "TglBindBuffer" [@@noalloc];
 
 module Bigarray = {
   type t 'a 'b;
@@ -956,19 +961,19 @@ module Bigarray = {
    };
   external dim: t 'a 'b => int = "bigarrayDim";
   /*external get: t 'a 'b => int => 'a = "bigarrayGet"; */
-  external setFloat64: t 'a 'b => int => 'a => unit = "bigarraySetFloat64";
-  external setFloat32: t 'a 'b => int => 'a => unit = "bigarraySetFloat32";
-  external setUint16: t 'a 'b => int => 'a => unit = "bigarraySetUint16";
+  external setFloat64: t 'a 'b => int => 'a => unit = "bigarraySetFloat64" [@@noalloc];
+  external setFloat32: t 'a 'b => int => 'a => unit = "bigarraySetFloat32" [@@noalloc];
+  external setUint16: t 'a 'b => int => 'a => unit = "bigarraySetUint16" [@@noalloc];
   external getUint16: t 'a 'b => int => 'a = "bigarrayGetUint16";
   
   external subFloat32: t 'a 'b => offset::int => len::int => t 'a 'b = "bigarraySubFloat32";
   external subUnit16: t 'a 'b => offset::int => len::int => t 'a 'b = "bigarraySubUint16";
 };
-external bufferData : context::contextT => target::int => data::Bigarray.t 'a 'b => usage::int => unit = "bufferData";
+external bufferData : context::contextT => target::int => data::Bigarray.t 'a 'b => usage::int => unit = "bufferData" [@@noalloc];
 
 external getAttribLocation : context::contextT => program::programT => name::string => attributeT = "TglGetAttribLocation";
 
-external enableVertexAttribArray : context::contextT => attribute::attributeT => unit = "TglEnableVertexAttribArray";
+external enableVertexAttribArray : context::contextT => attribute::attributeT => unit = "TglEnableVertexAttribArray" [@@noalloc];
 
 external vertexAttribPointer : context::contextT =>
                                attribute::attributeT =>
@@ -977,7 +982,7 @@ external vertexAttribPointer : context::contextT =>
                                normalize::bool =>
                                stride::int =>
                                offset::int =>
-                               unit = "TglVertexAttribPointer_bytecode" "TglVertexAttribPointer_native";
+                               unit = "TglVertexAttribPointer_bytecode" "TglVertexAttribPointer_native" [@@noalloc];
 
 /*external setProgram : gameViewControllerT => programT => unit = "setProgram";*/
 
@@ -987,11 +992,11 @@ external vertexAttribPointer : context::contextT =>
 
 /*external setVertexBuffer : gameViewControllerT => bufferT => unit = "setVertexBuffer";*/
 
-external clearColor : context::contextT => red::float => green::float => blue::float => alpha::float => unit = "TglClearColor";
+external clearColor : context::contextT => red::float => green::float => blue::float => alpha::float => unit = "TglClearColor" [@@noalloc];
 
 /*external glGenTextures : context::contextT => count::int => array textureT = "TglGenTextures";*/
 
-external drawElements : context::contextT => mode::int => count::int => type_::int => offset::int => unit = "TglDrawElements";
+external drawElements : context::contextT => mode::int => count::int => type_::int => offset::int => unit = "TglDrawElements" [@@noalloc];
 
 external getError : unit => int = "TglGetError";
 
@@ -1344,6 +1349,7 @@ let f (vc: gameViewControllerT) => {
       failwith "context was nil"
     | Some context =>
       setContext vc context;
+      setPreferredFramesPerSecond vc 60;
       let view = getView vc;
       setContext view context;
       setDrawableDepthFormat view GLKViewDrawableDepthFormat24;

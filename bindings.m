@@ -106,15 +106,11 @@ CAMLprim value TglGenBuffer(value context) {
 }
 
 void TglClearColor(value context, value r, value g, value b, value a) {
-  CAMLparam5(context, r, g, b, a);
   glClearColor(Double_val(r), Double_val(g), Double_val(b), Double_val(a));
-  CAMLreturn0;
 }
 
 void TglBindBuffer(value context, value kind, value buffer) {
-  CAMLparam3(context, kind, buffer);
   glBindBuffer(Int_val(kind), Int_val(buffer));
-  CAMLreturn0;
 }
 
 CAMLprim value TglGenTextures(value context, value count) {
@@ -159,21 +155,15 @@ void TglTexParameteri(value context, value kind, value pname, value param) {
 }
 
 void TglEnable(value context, value thing) {
-  CAMLparam2(context, thing);
   glEnable(Int_val(thing));
-  CAMLreturn0;
 }
 
 void TglDisable(value context, value thing) {
-  CAMLparam2(context, thing);
   glDisable(Int_val(thing));
-  CAMLreturn0;
 }
 
 void TglBlendFunc(value context, value sfactor, value dfactor) {
-  CAMLparam3(context, sfactor, dfactor);
   glBlendFunc(Int_val(sfactor), Int_val(dfactor));
-  CAMLreturn0;
 }
 
 // @Todo Comment both of those functions out because ... big array...
@@ -209,21 +199,15 @@ void TglBlendFunc(value context, value sfactor, value dfactor) {
 // }
 
 void setCurrentContext(value c) {
-  CAMLparam1(c);
   [EAGLContext setCurrentContext:(EAGLContext *)Field(c, 0)];
-  CAMLreturn0;
 }
 
 void TglUniform1i(value context, value location, value v) {
-  CAMLparam3(context, location, v);
   glUniform1i(Int_val(location), Int_val(v));
-  CAMLreturn0;
 }
 
 void TglUniform1f(value context, value location, value v) {
-  CAMLparam3(context, location, v);
   glUniform1f(Int_val(location), Double_val(v));
-  CAMLreturn0;
 }
 
 // Write our own bigarray wrapper. Below is that version for bufferData. We 
@@ -236,21 +220,15 @@ void TglUniform1f(value context, value location, value v) {
 //   CAMLreturn0;
 // }
 void bufferData(value context, value constant, value data, value usage) {
-  CAMLparam4(context, constant, data, usage);
   glBufferData(Int_val(constant), Field(data, 0), (GLvoid *)Field(data, 1), Int_val(usage));
-  CAMLreturn0;
 }
 
 void TglViewport(value context, value x, value y, value width, value height) {
-  CAMLparam5(context, x, y, width, height);
   glViewport(Int_val(x), Int_val(y), Int_val(width), Int_val(height));
-  CAMLreturn0;
 }
 
 void TglClear(value context, value mask) {
-  CAMLparam1(mask);
   glClear(Int_val(mask));
-  CAMLreturn0;
 }
 
 CAMLprim value TglGetUniformLocation(value context, value program, value name) {
@@ -264,17 +242,12 @@ CAMLprim value TglGetAttribLocation(value context, value program, value name) {
 }
 
 void TglEnableVertexAttribArray(value context, value attrib) {
-  CAMLparam2(context, attrib);
   glEnableVertexAttribArray(Int_val(attrib));
-  CAMLreturn0;
 }
 
 void TglVertexAttribPointer_native(value context, value index, value size, value typ, value normalized, value stride, value offset) {
-  CAMLparam5(context, index, size, typ, normalized);
-  CAMLxparam2(stride, offset);
   long o = (long)Int_val(offset);
   glVertexAttribPointer(Int_val(index), Int_val(size), Int_val(typ), Bool_val(normalized), Int_val(stride), (const GLvoid *)o);
-  CAMLreturn0;
 }
 
 void TglVertexAttribPointer_bytecode(value * argv, int argn) {
@@ -335,35 +308,16 @@ CAMLprim value TglGetShaderSource(value context, value shader) {
 }
 
 void TglDrawArrays(value context, value mode, value first, value count) {
-  CAMLparam4(context, mode, first, count);
   glDrawArrays(Int_val(mode), Int_val(first), Int_val(count));
-  CAMLreturn0;
 }
 
 void TglDrawElements(value context, value mode, value first, value typ, value offset) {
-  CAMLparam5(context, mode, first, typ, offset);
   long o = (long)Int_val(offset);
-  // printf("test before %d, %d, %d, %ld\n", Int_val(mode), Int_val(first), Int_val(typ), o);
   glDrawElements(Int_val(mode), Int_val(first), Int_val(typ), (const GLvoid *)o);
-  // printf("test after\n");
-  CAMLreturn0;
 }
 
 void TglUniformMatrix4fv(value context, value location, value transpose, value val) {
-  CAMLparam4(context, location, transpose, val);
-  // int size = Wosize_val(val);
-  // float *matrix = malloc(sizeof(float) * size);
-  // for (int i = 0; i < size; ++i){
-  //   matrix[i] = Double_field(val, i);
-  // }
-  // printf("test1 %0.6f\n", ((GLKMatrix4 *)Field(val, 0))->m[0]);
-  // printf("test2 %0.6f\n", ((GLKMatrix4 *)Field(val, 0))->m[1]);
-  // printf("test3 %0.6f\n", ((GLKMatrix4 *)Field(val, 0))->m[2]);
-  // printf("test4 %0.6f\n", ((GLKMatrix4 *)Field(val, 0))->m[3]);
-  // printf("test5 %0.6f\n", ((GLKMatrix4 *)Field(val, 0))->m[4]);
-  // printf("test6 %0.6f\n", ((GLKMatrix4 *)Field(val, 0))->m[5]);
   glUniformMatrix4fv(Int_val(location), 1, Bool_val(transpose), ((GLKMatrix4 *)Field(val, 0))->m);
-  CAMLreturn0;
 }
 
 /* =========================================================== */
@@ -406,21 +360,15 @@ CAMLprim value bigarrayGet(value arr, value i) {
 }
 
 void bigarraySetFloat64(value arr, value i, value v) {
-  CAMLparam3(arr, i, v);
   ((double *)Field(arr, 1))[Int_val(i)] = Double_val(v);
-  CAMLreturn0;
 }
 
 void bigarraySetFloat32(value arr, value i, value v) {
-  CAMLparam3(arr, i, v);
   ((float *)Field(arr, 1))[Int_val(i)] = (float)Double_val(v);
-  CAMLreturn0;
 }
 
 void bigarraySetUint16(value arr, value i, value v) {
-  CAMLparam3(arr, i, v);
   ((uint16_t *)Field(arr, 1))[Int_val(i)] = (uint16_t)Int_val(v);
-  CAMLreturn0;
 }
 
 CAMLprim value bigarrayGetUint16(value arr, value i, value v) {
@@ -594,11 +542,7 @@ CAMLprim value TglGenVertexArrayOES(value c) {
 }
 
 void TglBindVertexArrayOES(value c, value vertexArray) {
-  CAMLparam2(c, vertexArray);
-  // printf("glBindVertexArrayOES: %d\n", Int_val(vertexArray));
   glBindVertexArrayOES(Int_val(vertexArray));
-  // printf("glBindVertexArrayOES AFTER: %d\n", Int_val(vertexArray));
-  CAMLreturn0;
 }
 
 // ---------------------
@@ -641,20 +585,23 @@ void TglBindVertexArrayOES(value c, value vertexArray) {
 // }
 
 
-CAMLprim value setContext(value s, value c) {
-  CAMLparam2(s, c);
+void setContext(value s, value c) {
   id s2 = (id)(void *)Field(s, 0);
   GameViewController *game = (GameViewController *)s2;
   game.context = (EAGLContext *)Field(c, 0);
-  CAMLreturn(Val_int(0));
 }
 
-CAMLprim value setDrawableDepthFormat(value s, value f) {
-  CAMLparam2(s, f);
+void setPreferredFramesPerSecond(value s, value f) {
+  id s2 = (id)(void *)Field(s, 0);
+  GameViewController *game = (GameViewController *)s2;
+  game.preferredFramesPerSecond = Int_val(f);
+}
+
+void setDrawableDepthFormat(value s, value f) {
   GLKView *view = (GLKView *)Field(s, 0);
   view.drawableDepthFormat = Int_val(f);
-  CAMLreturn(Val_int(0));
 }
+
 
 CAMLprim value newEAGLContext(value num) {
   CAMLparam1(num);
