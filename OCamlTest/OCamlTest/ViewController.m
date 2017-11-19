@@ -10,8 +10,8 @@
 #import <OpenGLES/ES2/glext.h>
 
 
-extern void doReasonThingsWithSelf(GameViewController *this);
-extern void doUpdate(GameViewController *this);
+extern void reasonglMain(GameViewController *this);
+extern void reasonglUpdate(GameViewController *this);
 
 @interface GameViewController ()
 
@@ -24,7 +24,7 @@ extern void doUpdate(GameViewController *this);
 - (void)viewDidLoad
 {
 	[super viewDidLoad];
-	doReasonThingsWithSelf(self);
+	reasonglMain(self);
 }
 
 - (void)dealloc
@@ -64,7 +64,7 @@ extern void doUpdate(GameViewController *this);
 #pragma mark - GLKView and GLKViewController delegate methods
 
 - (void)update {
-	doUpdate(self);
+	reasonglUpdate(self);
 }
 
 @end

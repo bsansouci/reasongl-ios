@@ -93,8 +93,8 @@ OCAMLOPT = $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -I $(CURDIR) -cco
 # MFLAGS = -fobjc-legacy-dispatch -fobjc-abi-version=2
 MLFLAGS = -c -I Build
 
-C_FILES = CBindings
-RE_FILES = RGLConstants GLConstants Bindings Reasongl PurpleRain
+C_FILES = CTgls CBindings CBigarray
+RE_FILES = Bigarray RGLConstants GLConstants Bindings Tgls Reasongl Reasongl_Utils Reasongl_Draw PurpleRain
 
 C_FILES_PATH=$(addprefix Build/, $(addsuffix .o, $(C_FILES)))
 RE_FILES_PATH=$(addprefix Build/, $(addsuffix .cmx, $(RE_FILES)))
@@ -102,6 +102,10 @@ RE_FILES_PATH=$(addprefix Build/, $(addsuffix .cmx, $(RE_FILES)))
 app:: TestApp
 
 build:: TestApp deploy-simulator
+
+reason-watch:
+	# Brew install watchexec if you don't have it https://github.com/mattgreen/watchexec
+	watchexec -w src $(MAKE) TestReason
 
 
 deploy-simulator:
@@ -116,10 +120,12 @@ deploy-simulator:
 	## Launch the app without deps on ios-deploy
 	xcrun simctl launch --console booted $(BUNDLE_ID)
 
-TestApp: Build $(C_FILES_PATH) $(RE_FILES_PATH)
+TestReason: Build $(C_FILES_PATH) $(RE_FILES_PATH)
 		$(OCAMLOPT) $(C_FILES_PATH) $(RE_FILES_PATH) -output-obj -o Build/re_output.o
 		cp $(OCAMLDIR)/lib/ocaml/libasmrun.a Build/libGobi.a
 		ar -r Build/libGobi.a $(C_FILES_PATH) Build/re_output.o
+
+TestApp: TestReason
 		## Build the workspace
 		time xcodebuild \
 			-scheme $(SCHEME)\
@@ -135,7 +141,7 @@ Build:
 
 clean::
 		rm -f TestApp *.o *.cm[iox]
-		rm -rf Build
+		rm -rf Build/src/* Build/Products Build/libGobi.a
 
 Build/%.o: src/%.m
 		cp $< Build/$<

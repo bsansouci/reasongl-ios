@@ -2,6 +2,8 @@ open GLConstants;
 
 open Bindings;
 
+open Tgls;
+
 /*let render
       ::window
       ::mouseDown
@@ -344,25 +346,107 @@ let setupGL = (vc, context) => {
   }
 };
 
-let globalRender: ref(option((glEnv) => unit)) = ref(None);
+let drawGeometry =
+    (
+      ~vertexArray: Bigarray.t(float, Bigarray.float32_elt),
+      ~elementArray: Bigarray.t(int, Bigarray.int16_unsigned_elt),
+      ~mode,
+      ~count,
+      /*::textureBuffer*/
+      env
+    ) => {
+  /* Bind `vertexBuffer`, a pointer to chunk of memory to be sent to the GPU to the "register" called
+     `array_buffer` */
+  bindBuffer(~context=env.gl, ~target=gl_array_buffer, ~buffer=env.vertexBuffer);
 
-let f = (vc: gameViewControllerT) =>
-  switch (makeContext(EAGLRenderingAPIOpenGLES2)) {
-  | None => failwith("context was nil")
-  | Some(context) =>
-    setContext(vc, context);
-    setPreferredFramesPerSecond(vc, 60);
-    let view = getView(vc);
-    setContext(view, context);
-    setDrawableDepthFormat(view, GLKViewDrawableDepthFormat24);
-    let env = setupGL(vc, context);
-    switch globalRender^ {
-    | None => failwith("this shouldn't happen")
-    | Some(render) => render(env)
-    }
+  /*** Copy all of the data over into whatever's in `array_buffer` (so here it's `vertexBuffer`) **/
+  bufferData(~context=env.gl, ~target=gl_array_buffer, ~data=vertexArray, ~usage=gl_stream_draw);
+
+  /*** Tell the GPU about the shader attribute called `aVertexPosition` so it can access the data per vertex */
+  vertexAttribPointer(
+    ~context=env.gl,
+    ~attribute=env.aVertexPosition,
+    ~size=2,
+    ~type_=gl_float,
+    ~normalize=false,
+    ~stride=vertexSize * 4,
+    ~offset=0
+  );
+
+  /*** Same as above but for `aVertexColor` **/
+  vertexAttribPointer(
+    ~context=env.gl,
+    ~attribute=env.aVertexColor,
+    ~size=4,
+    ~type_=gl_float,
+    ~normalize=false,
+    ~stride=vertexSize * 4,
+    ~offset=2 * 4
+  );
+
+  /*** Same as above but for `aTextureCoord` **/
+  /*vertexAttribPointer
+    context::env.gl
+    attribute::env.aTextureCoord
+    size::2
+    type_::gl_float
+    normalize::false
+    stride::(vertexSize * 4)
+    offset::(6 * 4);*/
+
+  /*** Tell OpenGL about what the uniform called `uSampler` is pointing at, here it's given 0 which is what
+       texture0 represent.  **/
+  /*uniform1i context::env.gl location::env.uSampler value::0;*/
+
+  /*** Bind `elementBuffer`, a pointer to GPU memory to `element_array_buffer`. That "register" is used for
+       the data representing the indices of the vertex. **/
+  bindBuffer(~context=env.gl, ~target=gl_element_array_buffer, ~buffer=env.elementBuffer);
+
+  /*** Copy the `elementArray` into whatever buffer is in `element_array_buffer` **/
+  bufferData(
+    ~context=env.gl,
+    ~target=gl_element_array_buffer,
+    ~data=elementArray,
+    ~usage=gl_stream_draw
+  );
+  uniformMatrix4fv(
+    ~context=env.gl,
+    ~location=env.pMatrixUniform,
+    ~transpose=false,
+    ~value=env.camera.projectionMatrix
+  );
+
+  /*** We bind `texture` to texture_2d, like we did for the vertex buffers in some ways (I think?) **/
+  /*bindTexture
+    context::env.gl target::gl_texture_2d texture::textureBuffer;*/
+  /*bindVertexArray context::env.gl vertexArray::env.vertexArrayPtr;*/
+
+  /*** Final call which actually tells the GPU to draw. **/
+  drawElements(~context=env.gl, ~mode, ~count, ~type_=gl_unsigned_short, ~offset=0)
+};
+
+let flushGlobalBatch = (env) =>
+  if (env.batch.elementPtr > 0) {
+    /*let textureBuffer =
+      switch env.batch.currTex {
+      | None => env.batch.nullTex
+      | Some textureBuffer => textureBuffer
+      };*/
+    clearColor(~context=env.gl, ~red=1., ~green=0., ~blue=0., ~alpha=1.);
+    clear(~context=env.gl, 16384 lor 256);
+    drawGeometry(
+      ~vertexArray=Bigarray.subFloat32(env.batch.vertexArray, ~offset=0, ~len=env.batch.vertexPtr),
+      ~elementArray=
+        Bigarray.subUnit16(env.batch.elementArray, ~offset=0, ~len=env.batch.elementPtr),
+      ~mode=gl_triangles,
+      ~count=env.batch.elementPtr,
+      /*::textureBuffer*/
+      env
+    );
+    /*env.batch.currTex = None;*/
+    env.batch.vertexPtr = 0;
+    env.batch.elementPtr = 0
   };
-
-Callback.register("main", f);
 
 let toColorFloat = (i) => float_of_int(i) /. 255.;
 
@@ -449,287 +533,40 @@ let addRectToGlobalBatch =
   env.batch.elementPtr = j + 6
 };
 
-module Utils = {
-  let white = {r: 255, g: 255, b: 255};
-  let black = {r: 0, g: 0, b: 0};
-  let red = {r: 255, g: 0, b: 0};
-  let green = {r: 0, g: 255, b: 0};
-  let blue = {r: 0, g: 0, b: 255};
-  let pi = 4.0 *. atan(1.0);
-  let two_pi = 2.0 *. pi;
-  let half_pi = 0.5 *. pi;
-  let quarter_pi = 0.25 *. pi;
-  let tau = two_pi;
-  let foi = float_of_int;
-  let lookup_table: ref(array(int)) = ref([||]);
-  let color = (~r, ~g, ~b) : colorT => {r, g, b};
-  /*Calculation Functions*/
-  let round = (i) => floor(i +. 0.5);
-  let sq = (x) => x * x;
-  let rec pow = (~base, ~exp) =>
-    switch exp {
-    | 0 => 1
-    | 1 => base
-    | n =>
-      let b = pow(~base, ~exp=n / 2);
-      b
-      * b
-      * (
-        if (n mod 2 == 0) {
-          1
-        } else {
-          base
-        }
-      )
-    };
-  let constrain = (~amt, ~low, ~high) => max(min(amt, high), low);
-  let remapf = (~value, ~low1, ~high1, ~low2, ~high2) =>
-    low2 +. (high2 -. low2) *. ((value -. low1) /. (high1 -. low1));
-  let remap = (~value, ~low1, ~high1, ~low2, ~high2) =>
-    int_of_float(
-      remapf(
-        ~value=foi(value),
-        ~low1=foi(low1),
-        ~high1=foi(high1),
-        ~low2=foi(low2),
-        ~high2=foi(high2)
-      )
-    );
-  let norm = (~value, ~low, ~high) => remapf(~value, ~low1=low, ~high1=high, ~low2=0., ~high2=1.);
-  let randomf = (~min, ~max) => Random.float(max -. min) +. min;
-  let random = (~min, ~max) => Random.int(max - min) + min;
-  let randomSeed = (seed) => Random.init(seed);
-  let randomGaussian = () => {
-    let u1 = ref(0.0);
-    let u2 = ref(0.0);
-    while (u1^ <= min_float) {
-      u1 := Random.float(1.0);
-      u2 := Random.float(1.0)
-    };
-    sqrt((-2.0) *. log(u1^)) *. cos(two_pi *. u2^)
-  };
-  let lerpf = (~low, ~high) => remapf(~low1=0., ~high1=1., ~low2=low, ~high2=high);
-  let lerp = (~low, ~high, ~value) => int_of_float(lerpf(~low=foi(low), ~high=foi(high), ~value));
-  let distf = (~p1 as (x1: float, y1: float), ~p2 as (x2: float, y2: float)) => {
-    let dx = x2 -. x1;
-    let dy = y2 -. y1;
-    sqrt(dx *. dx +. dy *. dy)
-  };
-  let dist = (~p1 as (x1, y1), ~p2 as (x2, y2)) =>
-    distf(~p1=(foi(x1), foi(y1)), ~p2=(foi(x2), foi(y2)));
-  let magf = (vec) => distf(~p1=(0., 0.), ~p2=vec);
-  let mag = (vec) => dist(~p1=(0, 0), ~p2=vec);
-  let lerpColor = (~low, ~high, ~value) => {
-    r: lerp(~low=low.r, ~high=high.r, ~value),
-    g: lerp(~low=low.g, ~high=high.g, ~value),
-    b: lerp(~low=low.b, ~high=high.b, ~value)
-  };
-  let degrees = (x) => 180.0 /. pi *. x;
-  let radians = (x) => pi /. 180.0 *. x;
-  let noise = (x, y, z) => {
-    let p = lookup_table^;
-    let fade = (t) => t *. t *. t *. (t *. (t *. 6.0 -. 15.0) +. 10.0);
-    let grad = (hash, x, y, z) =>
-      switch (hash land 15) {
-      | 0 => x +. y
-      | 1 => -. x +. y
-      | 2 => x -. y
-      | 3 => -. x -. y
-      | 4 => x +. z
-      | 5 => -. x +. z
-      | 6 => x -. z
-      | 7 => -. x -. z
-      | 8 => y +. z
-      | 9 => -. y +. z
-      | 10 => y -. z
-      | 11 => -. y -. z
-      | 12 => y +. x
-      | 13 => -. y +. z
-      | 14 => y -. x
-      | 15 => -. y -. z
-      | _ => 0.0
-      };
-    let xi = int_of_float(x) land 255;
-    let yi = int_of_float(y) land 255;
-    let zi = int_of_float(z) land 255;
-    let xf = x -. floor(x);
-    let yf = y -. floor(y);
-    let zf = z -. floor(z);
-    let u = fade(xf);
-    let v = fade(yf);
-    let w = fade(zf);
-    let aaa = p[p[p[xi] + yi] + zi];
-    let aba = p[p[p[xi] + (yi + 1)] + zi];
-    let aab = p[p[p[xi] + yi] + (zi + 1)];
-    let abb = p[p[p[xi] + (yi + 1)] + (zi + 1)];
-    let baa = p[p[p[xi + 1] + yi] + zi];
-    let bba = p[p[p[xi + 1] + (yi + 1)] + zi];
-    let bab = p[p[p[xi + 1] + yi] + (zi + 1)];
-    let bbb = p[p[p[xi + 1] + (yi + 1)] + (zi + 1)];
-    let x1 = lerpf(~low=grad(aaa, xf, yf, zf), ~high=grad(baa, xf -. 1.0, yf, zf), ~value=u);
-    let x2 =
-      lerpf(
-        ~low=grad(aba, xf, yf -. 1.0, zf),
-        ~high=grad(bba, xf -. 1.0, yf -. 1.0, zf),
-        ~value=u
-      );
-    let y1 = lerpf(~low=x1, ~high=x2, ~value=v);
-    let x1 =
-      lerpf(
-        ~low=grad(aab, xf, yf, zf -. 1.0),
-        ~high=grad(bab, xf -. 1.0, yf, zf -. 1.0),
-        ~value=u
-      );
-    let x2 =
-      lerpf(
-        ~low=grad(abb, xf, yf -. 1.0, zf -. 1.0),
-        ~high=grad(bbb, xf -. 1.0, yf -. 1.0, zf -. 1.0),
-        ~value=u
-      );
-    let y2 = lerpf(~low=x1, ~high=x2, ~value=v);
-    (lerpf(~low=y1, ~high=y2, ~value=w) +. 1.0) /. 2.0
-  };
-  let shuffle = (array) => {
-    let array = Array.copy(array);
-    let length = Array.length(array);
-    for (i in 0 to 256 - 1) {
-      let j = Random.int(length - i);
-      let tmp = array[i];
-      array[i] = array[i + j];
-      array[i + j] = tmp
-    };
-    array
-  };
-  let noiseSeed = (seed) => {
-    let state = Random.get_state();
-    Random.init(seed);
-    let array = Array.make(256, 0);
-    let array = Array.mapi((i, _) => i, array);
-    let array = shuffle(array);
-    let double_array = Array.append(array, array);
-    lookup_table := double_array;
-    Random.set_state(state)
-  };
-};
+let globalRender: ref(option((glEnv => unit))) = ref(None);
 
-let drawArc =
-    (
-      env,
-      (xCenterOfCircle: float, yCenterOfCircle: float),
-      radx: float,
-      rady: float,
-      start: float,
-      stop: float,
-      isPie: bool,
-      {r, g, b}
-    ) => {
-  let noOfFans = int_of_float(radx +. rady) / 4 + 10;
-  /*maybeFlushBatch texture::None vert::(8 * noOfFans) el::(3 * noOfFans) env;*/
-  let pi = 4.0 *. atan(1.0);
-  let anglePerFan = 2. *. pi /. float_of_int(noOfFans);
-  let (r, g, b) = (toColorFloat(r), toColorFloat(g), toColorFloat(b));
-  /*print_endline @@ "r " ^ (string_of_float r) ^ "g " ^ (string_of_float g) ^ "b " ^ string_of_float b;*/
-  let verticesData = env.batch.vertexArray;
-  let elementData = env.batch.elementArray;
-  let setFloat32 = Bigarray.setFloat32;
-  let setUint16 = Bigarray.setUint16;
-  let getUint16 = Bigarray.getUint16;
-  let vertexArrayOffset = env.batch.vertexPtr;
-  let elementArrayOffset = env.batch.elementPtr;
-  let start_i =
-    if (isPie) {
-      /* Start one earlier and force the first point to be the center */
-      int_of_float(start /. anglePerFan)
-      - 2
-    } else {
-      int_of_float(start /. anglePerFan) - 1
-    };
-  let stop_i = int_of_float(stop /. anglePerFan) - 1;
-  for (i in start_i to stop_i) {
-    let (xCoordinate, yCoordinate) =
-      if (isPie && i - start_i == 0) {
-        (
-          /* force the first point to be the center */
-          xCenterOfCircle,
-          yCenterOfCircle
-        )
-      } else {
-        let angle = anglePerFan *. float_of_int(i + 1);
-        (xCenterOfCircle +. cos(angle) *. radx, yCenterOfCircle +. sin(angle) *. rady)
-      };
-    let ii = (i - start_i) * vertexSize + vertexArrayOffset;
-    setFloat32(verticesData, ii + 0, xCoordinate);
-    setFloat32(verticesData, ii + 1, yCoordinate);
-    setFloat32(verticesData, ii + 2, r);
-    setFloat32(verticesData, ii + 3, g);
-    setFloat32(verticesData, ii + 4, b);
-    setFloat32(verticesData, ii + 5, 1.0);
-    setFloat32(verticesData, ii + 6, 0.0);
-    setFloat32(verticesData, ii + 7, 0.0);
-    /* For the first three vertices, we don't do any deduping. Then for the subsequent ones, we'll actually
-       have 3 elements, one pointing at the first vertex, one pointing at the previously added vertex and one
-       pointing at the current vertex. This mimicks the behavior of triangle_fan. */
-    if (i - start_i < 3) {
-      setUint16(elementData, i - start_i + elementArrayOffset, ii / vertexSize)
-    } else {
-      /* We've already added 3 elements, for i = 0, 1 and 2. From now on, we'll add 3 elements _per_ i.
-         To calculate the correct offset in `elementData` we remove 3 from i as if we're starting from 0 (the
-         first time we enter this loop i = 3), then for each i we'll add 3 elements (so multiply by 3) BUT for
-         i = 3 we want `jj` to be 3 so we shift everything by 3 (so add 3). Everything's also shifted by
-         `elementArrayOffset` */
-      let jj = (i - start_i - 3) * 3 + elementArrayOffset + 3;
-      setUint16(elementData, jj, vertexArrayOffset / vertexSize);
-      setUint16(elementData, jj + 1, getUint16(elementData, jj - 1));
-      setUint16(elementData, jj + 2, ii / vertexSize)
+let reasonglMain = (vc: gameViewControllerT) =>
+  switch (makeContext(EAGLRenderingAPIOpenGLES2)) {
+  | None => failwith("Unable to setup OpenGL rendering context :(")
+  | Some(context) =>
+    setContext(vc, context);
+    setPreferredFramesPerSecond(vc, 60);
+    let view = getView(vc);
+    setContext(view, context);
+    setDrawableDepthFormat(view, GLKViewDrawableDepthFormat24);
+    let env = setupGL(vc, context);
+    switch globalRender^ {
+    | None => failwith("You forgot to call Reasongl.run() -- no setup function defined.")
+    | Some(render) => render(env)
     }
   };
-  env.batch.vertexPtr = env.batch.vertexPtr + noOfFans * vertexSize;
-  env.batch.elementPtr = env.batch.elementPtr + (stop_i - start_i - 3) * 3 + 3
-};
 
-module Draw = {
-  let fill = (color, env: glEnv) => env.style = {...env.style, fillColor: Some(color)};
-  let background = (color, env: glEnv) => {
-    clear(~context=env.gl, 16384 lor 256);
-    let w = float_of_int(Env.width(env));
-    let h = float_of_int(Env.height(env));
-    addRectToGlobalBatch(
-      env,
-      ~bottomRight=(w, h),
-      ~bottomLeft=(0., h),
-      ~topRight=(w, 0.),
-      ~topLeft=(0., 0.),
-      ~color
-    )
-  };
-  let drawEllipse = (env, center, radx: float, rady: float, c) =>
-    drawArc(env, center, radx, rady, 0., Utils.tau, false, c);
-  let ellipsef = (~center, ~radx, ~rady, env: glEnv) =>
-    switch env.style.fillColor {
-    | None => () /* Don't draw fill */
-    | Some(fill) => drawEllipse(env, center, radx, rady, fill)
-    /*switch env.style.strokeColor {
-      | None => () /* Don't draw stroke */
-      | Some stroke =>
-        drawArcStroke
-          env
-          center
-          radx
-          rady
-          0.
-          Utils.tau
-          false
-          false
-          env.matrix
-          stroke
-          env.style.strokeWeight
-      }*/
-    };
-  let ellipse = (~center as (cx, cy), ~radx, ~rady, env: glEnv) =>
-    ellipsef(
-      ~center=(float_of_int(cx), float_of_int(cy)),
-      ~radx=float_of_int(radx),
-      ~rady=float_of_int(rady),
-      env
+Callback.register("reasonglMain", reasonglMain);
+
+let run = (~setup, ~draw, ()) =>
+  /* Register a global render. */
+  globalRender :=
+    Some(
+      (env) => {
+        let state = ref(setup(env));
+        Callback.register(
+          "reasonglUpdate",
+          (_) => {
+            state := draw(state^, env);
+
+            /*** Flush buffers */
+            flushGlobalBatch(env)
+          }
+        )
+      }
     );
-};

@@ -1,7 +1,10 @@
-open Reasongl;
 open GLConstants;
 open Bindings;
+open Tgls;
 
+let module Utils = Reasongl_Utils;
+let module Draw = Reasongl_Draw;
+let module Env = Reasongl.Env;
 
 /* https://www.youtube.com/watch?v=KkyIDI6rQJI
    Purple rain processing demo */
@@ -11,7 +14,7 @@ type dropT = {
   z: int,
   len: int,
   yspeed: int,
-  color: colorT,
+  color: Reasongl.colorT,
   time: int
 };
 
@@ -32,126 +35,6 @@ let make = (w, (ymin, ymax), time) => {
     time
   }
 };
-
-let drawGeometry =
-    (
-      ~vertexArray: Bigarray.t(float, Bigarray.float32_elt),
-      ~elementArray: Bigarray.t(int, Bigarray.int16_unsigned_elt),
-      ~mode,
-      ~count,
-      /*::textureBuffer*/
-      env
-    ) => {
-  /* Bind `vertexBuffer`, a pointer to chunk of memory to be sent to the GPU to the "register" called
-     `array_buffer` */
-  bindBuffer(~context=env.gl, ~target=gl_array_buffer, ~buffer=env.vertexBuffer);
-
-  /*** Copy all of the data over into whatever's in `array_buffer` (so here it's `vertexBuffer`) **/
-  bufferData(~context=env.gl, ~target=gl_array_buffer, ~data=vertexArray, ~usage=gl_stream_draw);
-
-  /*** Tell the GPU about the shader attribute called `aVertexPosition` so it can access the data per vertex */
-  vertexAttribPointer(
-    ~context=env.gl,
-    ~attribute=env.aVertexPosition,
-    ~size=2,
-    ~type_=gl_float,
-    ~normalize=false,
-    ~stride=vertexSize * 4,
-    ~offset=0
-  );
-
-  /*** Same as above but for `aVertexColor` **/
-  vertexAttribPointer(
-    ~context=env.gl,
-    ~attribute=env.aVertexColor,
-    ~size=4,
-    ~type_=gl_float,
-    ~normalize=false,
-    ~stride=vertexSize * 4,
-    ~offset=2 * 4
-  );
-
-  /*** Same as above but for `aTextureCoord` **/
-  /*vertexAttribPointer
-    context::env.gl
-    attribute::env.aTextureCoord
-    size::2
-    type_::gl_float
-    normalize::false
-    stride::(vertexSize * 4)
-    offset::(6 * 4);*/
-
-  /*** Tell OpenGL about what the uniform called `uSampler` is pointing at, here it's given 0 which is what
-       texture0 represent.  **/
-  /*uniform1i context::env.gl location::env.uSampler value::0;*/
-
-  /*** Bind `elementBuffer`, a pointer to GPU memory to `element_array_buffer`. That "register" is used for
-       the data representing the indices of the vertex. **/
-  bindBuffer(~context=env.gl, ~target=gl_element_array_buffer, ~buffer=env.elementBuffer);
-
-  /*** Copy the `elementArray` into whatever buffer is in `element_array_buffer` **/
-  bufferData(
-    ~context=env.gl,
-    ~target=gl_element_array_buffer,
-    ~data=elementArray,
-    ~usage=gl_stream_draw
-  );
-  uniformMatrix4fv(
-    ~context=env.gl,
-    ~location=env.pMatrixUniform,
-    ~transpose=false,
-    ~value=env.camera.projectionMatrix
-  );
-
-  /*** We bind `texture` to texture_2d, like we did for the vertex buffers in some ways (I think?) **/
-  /*bindTexture
-    context::env.gl target::gl_texture_2d texture::textureBuffer;*/
-  /*bindVertexArray context::env.gl vertexArray::env.vertexArrayPtr;*/
-
-  /*** Final call which actually tells the GPU to draw. **/
-  drawElements(~context=env.gl, ~mode, ~count, ~type_=gl_unsigned_short, ~offset=0)
-};
-
-let flushGlobalBatch = (env) =>
-  if (env.batch.elementPtr > 0) {
-    /*let textureBuffer =
-      switch env.batch.currTex {
-      | None => env.batch.nullTex
-      | Some textureBuffer => textureBuffer
-      };*/
-    clearColor(~context=env.gl, ~red=1., ~green=0., ~blue=0., ~alpha=1.);
-    clear(~context=env.gl, 16384 lor 256);
-    drawGeometry(
-      ~vertexArray=Bigarray.subFloat32(env.batch.vertexArray, ~offset=0, ~len=env.batch.vertexPtr),
-      ~elementArray=
-        Bigarray.subUnit16(env.batch.elementArray, ~offset=0, ~len=env.batch.elementPtr),
-      ~mode=gl_triangles,
-      ~count=env.batch.elementPtr,
-      /*::textureBuffer*/
-      env
-    );
-    /*env.batch.currTex = None;*/
-    env.batch.vertexPtr = 0;
-    env.batch.elementPtr = 0
-  };
-
-let run = (~setup, ~draw, ()) =>
-  /* Register a global render. */
-  globalRender :=
-    Some(
-      (env) => {
-        let state = ref(setup(env));
-        Callback.register(
-          "update",
-          (_) => {
-            state := draw(state^, env);
-
-            /*** Flush buffers */
-            flushGlobalBatch(env)
-          }
-        )
-      }
-    );
 
 type state = {
   lst: array(dropT),
@@ -205,4 +88,5 @@ let draw = ({lst, running, time}, env) => {
     {...state, time: newTime}
   };*/
 /*run ::setup ::draw ::mouseDown ::mouseUp ::mouseDragged ();*/
-run(~setup, ~draw, ());
+
+Reasongl.run(~setup, ~draw, ());
