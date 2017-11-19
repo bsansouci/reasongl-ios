@@ -93,17 +93,20 @@ OCAMLOPT = $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -I $(CURDIR) -cco
 # MFLAGS = -fobjc-legacy-dispatch -fobjc-abi-version=2
 MLFLAGS = -c -I Build
 
-C_FILES = bindings
-RE_FILES = test hello
+C_FILES = CBindings
+RE_FILES = RGLConstants GLConstants Bindings Reasongl PurpleRain
 
 C_FILES_PATH=$(addprefix Build/, $(addsuffix .o, $(C_FILES)))
 RE_FILES_PATH=$(addprefix Build/, $(addsuffix .cmx, $(RE_FILES)))
 
+app:: TestApp
+
 build:: TestApp deploy-simulator
 
+
 deploy-simulator:
-	## Boot the simulator
-	open -a "Simulator" --args -CurrentDeviceUDID $(DEVICE_ID)
+	## Boot the simulator if there's not one already booted
+	(xcrun simctl list | grep '(Booted)' -q) || open -a "Simulator" --args -CurrentDeviceUDID $(DEVICE_ID)
 
 	./waitforsimulator.sh
 
@@ -128,25 +131,25 @@ TestApp: Build $(C_FILES_PATH) $(RE_FILES_PATH)
 			CONFIGURATION_BUILD_DIR=$(BUILD_DIR)
 
 Build:
-	mkdir -p Build
+	mkdir -p Build/src
 
 clean::
 		rm -f TestApp *.o *.cm[iox]
 		rm -rf Build
 
-Build/%.o: %.m
+Build/%.o: src/%.m
 		cp $< Build/$<
 		$(CC) $(CFLAGS) $(MFLAGS) -c -o $@ Build/$<
 
-Build/%.cmi: %.rei
+Build/%.cmi: src/%.rei
 		cp $< Build/$<
 		$(OCAMLOPT) $(MLFLAGS) -o $@ -impl Build/$<
 
-Build/%.cmo: %.re
+Build/%.cmo: src/%.re
 		cp $< Build/$<
 		$(OCAMLOPT) $(MLFLAGS) -o $@ -impl Build/$<
 
-Build/%.cmx: %.re
+Build/%.cmx: src/%.re
 		cp $< Build/$<
 		$(OCAMLOPT) $(MLFLAGS) -o $@ -impl Build/$<
 
