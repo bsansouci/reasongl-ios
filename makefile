@@ -49,12 +49,12 @@
 DIR=$(shell pwd)
 
 # Should be either 'iphonesimulator' or 'iphoneos'
-SIMULATOR_OR_IOS_SDK=iphonesimulator
+SIMULATOR_OR_IOS_SDK=iphoneos
 
 BUILD_DIR=$(DIR)/Build/Products/Debug-$(SIMULATOR_OR_IOS_SDK)
 
 # Should be a valid version that you have.
-VERSION=10.3
+VERSION=11.1
 
 # I think this makes it build all architectures. Need to confirm that.
 # ONLY_ACTIVE_ARCH='NO'
@@ -65,7 +65,7 @@ WORKSPACE=OCamlTest/OCamlTest.xcworkspace
 # Should be either 'Release' or 'Debug'
 CONFIG=Debug
 # Might not be needed but can be 'i386' or 'x86_64' for simulator and 'armv6' or 'armv7' or 'arm64' for devices.
-ARCH=x86_64
+ARCH=arm64
 
 # The scheme you want to build.
 SCHEME=OCamlTest
@@ -82,12 +82,13 @@ IOSMINREV = 7.0
 
 HIDEOUT = /Applications/Xcode.app/Contents/Developer
 TOOLDIR = $(HIDEOUT)/Toolchains/XcodeDefault.xctoolchain/usr/bin
-PLT = $(HIDEOUT)/Platforms/iPhoneSimulator.platform
-SDK = /Developer/SDKs/iPhoneSimulator.sdk
+PLT = $(HIDEOUT)/Platforms/iPhoneOS.platform
+SDK = /Developer/SDKs/iPhoneOS.sdk
 CURDIR = $(shell pwd)
 OCAMLDIR = $(CURDIR)/bin/ocaml-iPhoneSimulator-64/release
+OCAMLDIR = $(CURDIR)/bin/ocaml-iPhoneOS-64/release
 OCAMLBIN = $(CURDIR)/bin/ocaml-host-64/release
-CC = $(TOOLDIR)/clang -arch x86_64
+CC = $(TOOLDIR)/clang -arch $(ARCH)
 CFLAGS = -isysroot $(PLT)$(SDK) -isystem $(OCAMLDIR)/lib/ocaml -DCAML_NAME_SPACE -I$(CURDIR)/OCamlTest/OCamlTest -I$(OCAMLDIR)/lib/ocaml -I$(OCAMLDIR)/../stdlib/ -fno-objc-arc -miphoneos-version-min=$(IOSMINREV)
 OCAMLOPT = $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -I $(CURDIR) -ccopt -isysroot -ccopt $(PLT)$(SDK)
 # MFLAGS = -fobjc-legacy-dispatch -fobjc-abi-version=2
