@@ -146,9 +146,6 @@ let module Gl
       ~pixels: Bigarray.Array1.t('a, 'b, Bigarray.c_layout)
     ) =>
     failwith("no textsubimage2d");
-  type imageT;
-  let getImageWidth = (image) => failwith("Not impl getImageWidth");
-  let getImageHeight = (image) => failwith("Not impl getImageHeight");
 
   type loadOptionT =
     | LoadAuto
@@ -156,10 +153,31 @@ let module Gl
     | LoadLA
     | LoadRGB
     | LoadRGBA;
-  let loadImage =
-    (~filename: string, ~loadOption=?, ~callback: option(imageT) => unit, unit) =>
-    failwith("Not impl loadImage");
-  let texImage2DWithImage = (~context: contextT, ~target: int, ~level: int, ~image: imageT) => failwith("not textimage2dwithimage");
+
+
+  type imageT = {
+    width: int,
+    height: int,
+    channels: int,
+    data: Bigarray.Array1.t(int, Bigarray.int8_unsigned_elt, Bigarray.c_layout)
+  };
+  let getImageWidth = (image) => image.width;
+  let getImageHeight = (image) => image.height;
+
+  let loadImage = (~filename: string, ~loadOption=?, ~callback: option(imageT) => unit, unit) => {
+    callback(Bindings.loadImage(~filename))
+  };
+
+  let texImage2DWithImage = (~context, ~target, ~level, ~image) =>
+    texImage2D_RGBA(
+      ~context,
+      ~target,
+      ~level,
+      ~width=image.width,
+      ~height=image.height,
+      ~border=0,
+      ~data=image.data
+  );
 
   let getShaderSource = (~context: contextT, shaderT) => failwith("not impl get shader source");
   let drawArrays = (~context: contextT, ~mode: int, ~first: int, ~count: int) => failwith("no draw arrays");

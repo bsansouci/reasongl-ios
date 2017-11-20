@@ -29,3 +29,6 @@ external getView : gameViewControllerT => _GLKViewT = "getGLKView";
 /*external isNil : 'a => bool = "isNil";*/
 
 [@noalloc] external setCurrentContext : contextT => unit = "setCurrentContext";
+
+
+external loadImage : (~filename: string) => option('a) = "loadImage";

@@ -187,3 +187,53 @@ CAMLprim value Mat4_create() {
   Field(ret, 0) = (long)m;
   CAMLreturn(ret);
 }
+
+
+#define Val_none Val_int(0)
+
+static value Val_some(value v) {
+  CAMLparam1(v);
+  CAMLlocal1(some);
+  some = caml_alloc_small(1, 0);
+  Field(some, 0) = v;
+  CAMLreturn(some);
+}
+
+CAMLprim value loadImage(value filename) {
+  CAMLparam1(filename);
+  CAMLlocal2(record_image_data, dataArr);
+
+  NSString* name = [NSString stringWithUTF8String:String_val(filename)];
+  CGImageRef spriteImage = [UIImage imageNamed:name].CGImage;
+  if (!spriteImage) {
+    CAMLreturn(Val_none);
+  } else {
+    size_t width = CGImageGetWidth(spriteImage);
+    size_t height = CGImageGetHeight(spriteImage);
+
+    uint channels = 4;
+    GLubyte * spriteData = (GLubyte *) calloc(width*height*channels, sizeof(GLubyte));
+
+    // copy image into the data array
+    CGContextRef spriteContext = CGBitmapContextCreate(
+      spriteData, width, height, 8, width * channels,
+      CGImageGetColorSpace(spriteImage),
+      kCGImageAlphaPremultipliedLast
+    );
+    CGContextDrawImage(spriteContext, CGRectMake(0, 0, width, height), spriteImage);
+    CGContextRelease(spriteContext);
+
+    record_image_data = caml_alloc_small(4, 0);
+    Field(record_image_data, 0) = Val_int(width);
+    Field(record_image_data, 1) = Val_int(height);
+    Field(record_image_data, 2) = Val_int(channels);
+
+    // put the data in a bigarray
+    intnat *size = malloc(sizeof(intnat));
+    *size = width * height * channels;
+    dataArr = caml_ba_alloc(CAML_BA_UINT8, 1, spriteData, size);
+    Field(record_image_data, 3) = dataArr;
+
+    CAMLreturn(Val_some(record_image_data));
+  }
+}

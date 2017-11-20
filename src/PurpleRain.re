@@ -33,16 +33,22 @@ let make = (w, (ymin, ymax), time) => {
 type state = {
   lst: array(dropT),
   running: bool,
-  time: int
+  time: int,
+  background: imageT,
+  flappy: imageT,
 };
 
 let setup = (env) => {
   Env.size(~width=375, ~height=667, env);
   let lst = Array.init(500, (_) => make(Env.width(env), ((-500), (-50)), 0));
-  {lst, time: 0, running: true}
+  {
+    lst, time: 0, running: true,
+    background: Reprocessing.Draw.loadImage(~filename="background.png", env),
+    flappy: Reprocessing.Draw.loadImage(~filename="flappy-base.png", env)
+  }
 };
 
-let draw = ({lst, running, time}, env) => {
+let draw = ({lst, running, time} as state, env) => {
   Draw.background(Utils.color(~r=230, ~g=230, ~b=250, ~a=255), env);
   /*Draw.fill (Utils.color r::100 g::0 b::0) env;*/
   Utils.randomSeed(time);
@@ -69,7 +75,9 @@ let draw = ({lst, running, time}, env) => {
     },
     lst
   );
-  {lst, running, time: running ? time + 1 : time}
+  Draw.image(state.background, ~pos=(0, 0), env);
+  Draw.image(state.flappy, ~pos=(100, 100), env);
+  {...state, lst, running, time: running ? time + 1 : time}
 };
 
 /*let mouseDown state _env => {...state, running: false};

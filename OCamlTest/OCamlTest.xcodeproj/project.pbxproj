@@ -10,6 +10,8 @@
 		43C88D2F1E3B340C002BA291 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D2D1E3B340C002BA291 /* Shader.fsh */; };
 		43C88D301E3B340C002BA291 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D2E1E3B340C002BA291 /* Shader.vsh */; };
 		43C88D321E3B349A002BA291 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D311E3B349A002BA291 /* Main.storyboard */; };
+		7F3824CF1FC13D5800CB54CC /* flappy-base.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F3824CE1FC13D5800CB54CC /* flappy-base.png */; };
+		7F3824D11FC1462200CB54CC /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F3824D01FC1462200CB54CC /* background.png */; };
 		7F81026F1FC1015200D2CC05 /* bigarray.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 43C88D331E3F0DBB002BA291 /* bigarray.a */; };
 		7F8102711FC101F200D2CC05 /* libGobi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F8102701FC101F200D2CC05 /* libGobi.a */; };
 		C99F606A1E34FE8F0064B563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F60691E34FE8F0064B563 /* main.m */; };
@@ -35,6 +37,8 @@
 		43C88D2E1E3B340C002BA291 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
 		43C88D311E3B349A002BA291 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		43C88D331E3F0DBB002BA291 /* bigarray.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = bigarray.a; path = "../bin/ocaml-iPhoneSimulator-64/release/lib/ocaml/bigarray.a"; sourceTree = "<group>"; };
+		7F3824CE1FC13D5800CB54CC /* flappy-base.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "flappy-base.png"; path = "../flappy-base.png"; sourceTree = "<group>"; };
+		7F3824D01FC1462200CB54CC /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		7F8102701FC101F200D2CC05 /* libGobi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libGobi.a; path = ../Build/libGobi.a; sourceTree = "<group>"; };
 		C99F60651E34FE8F0064B563 /* OCamlTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCamlTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99F60691E34FE8F0064B563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -109,6 +113,8 @@
 				C99F606F1E34FE8F0064B563 /* ViewController.m */,
 				43C88D311E3B349A002BA291 /* Main.storyboard */,
 				C99F60741E34FE8F0064B563 /* Assets.xcassets */,
+				7F3824CE1FC13D5800CB54CC /* flappy-base.png */,
+				7F3824D01FC1462200CB54CC /* background.png */,
 				C99F60761E34FE8F0064B563 /* LaunchScreen.storyboard */,
 				C99F60791E34FE8F0064B563 /* Info.plist */,
 				C99F60681E34FE8F0064B563 /* Supporting Files */,
@@ -217,7 +223,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F3824CF1FC13D5800CB54CC /* flappy-base.png in Resources */,
 				43C88D2F1E3B340C002BA291 /* Shader.fsh in Resources */,
+				7F3824D11FC1462200CB54CC /* background.png in Resources */,
 				C99F60781E34FE8F0064B563 /* LaunchScreen.storyboard in Resources */,
 				C99F60751E34FE8F0064B563 /* Assets.xcassets in Resources */,
 				43C88D321E3B349A002BA291 /* Main.storyboard in Resources */,
