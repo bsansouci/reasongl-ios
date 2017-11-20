@@ -54,7 +54,7 @@ SIMULATOR_OR_IOS_SDK=iphoneos
 BUILD_DIR=$(DIR)/Build/Products/Debug-$(SIMULATOR_OR_IOS_SDK)
 
 # Should be a valid version that you have.
-VERSION=11.1
+VERSION=10.3
 
 # I think this makes it build all architectures. Need to confirm that.
 # ONLY_ACTIVE_ARCH='NO'
@@ -87,14 +87,16 @@ SDK = /Developer/SDKs/iPhoneOS.sdk
 CURDIR = $(shell pwd)
 OCAMLDIR = $(CURDIR)/bin/ocaml-iPhoneSimulator-64/release
 OCAMLDIR = $(CURDIR)/bin/ocaml-iPhoneOS-64/release
+OCAMLDIR = ~/.opam/4.04.0+ios+arm64
 OCAMLBIN = $(CURDIR)/bin/ocaml-host-64/release
+OCAMLBIN = ~/.opam/4.04.0+ios+arm64
 CC = $(TOOLDIR)/clang -arch $(ARCH)
 CFLAGS = -isysroot $(PLT)$(SDK) -isystem $(OCAMLDIR)/lib/ocaml -DCAML_NAME_SPACE -I$(CURDIR)/OCamlTest/OCamlTest -I$(OCAMLDIR)/lib/ocaml -I$(OCAMLDIR)/../stdlib/ -fno-objc-arc -miphoneos-version-min=$(IOSMINREV)
 OCAMLOPT = $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -I $(CURDIR) -ccopt -isysroot -ccopt $(PLT)$(SDK)
 # MFLAGS = -fobjc-legacy-dispatch -fobjc-abi-version=2
 MLFLAGS = -c -I Build/src -I Build/reasongl-interface/src -I Build/reprocessing/src -I $(OCAMLDIR)/lib/ocaml bigarray.cmxa
 
-C_FILES = CTgls CBindings bigarray_stubs mmap_unix
+C_FILES = CTgls CBindings
 REASONGL_INTERFACE_FILES = RGLConstants RGLEvents RGLInterface ReasonglInterface
 REASONGL_FILES = GLConstants Bindings Tgls Reasongl
 # this was produced by running 'ocamldep -pp 'refmt --print=binary' -one-line -ml-synonym .re -mli-synonym .rei  *.re *.rei -modules -sort' in the reprocessing/src directory
