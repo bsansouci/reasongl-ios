@@ -63,20 +63,27 @@ let module Gl
     };
   };
 
-  let render = (~window, ~mouseDown=?, ~mouseUp=?, ~mouseMove=?, ~keyDown=?, ~keyUp=?, ~windowResize=?, ~displayFunc, ()) => {
-    let lastDraw = ref(Sys.time());
-    Callback.register("reasonglUpdate", (_) => {
-      let now = Sys.time();
-      displayFunc((now -. lastDraw^) /. 1000.); /* I think it wants ms */
-      lastDraw := now;
-    })
-  };
-
   let module Events: RGLEvents.t = {
     include RGLEvents.T;
     let keycodeMap = (keycode) => {
       Nothing
     }
+  };
+
+  let render = (~window, ~mouseDown=?, ~mouseUp=?, ~mouseMove=?, ~keyDown=?, ~keyUp=?, ~windowResize=?, ~displayFunc, ()) => {
+    Callback.register("reasonglUpdate", displayFunc);
+    Callback.register("reasonglTouchDrag", switch mouseMove {
+    | None => (x, y) => ()
+    | Some(fn) => (x, y) => ignore(fn(~x=int_of_float(x), ~y=int_of_float(y)))
+    });
+    Callback.register("reasonglTouchPress", switch mouseDown {
+    | None => (x, y) => ()
+    | Some(fn) => (x, y) => ignore(fn(~button=Events.LeftButton, ~state=Events.MouseDown, ~x=int_of_float(x), ~y=int_of_float(y)))
+    });
+    Callback.register("reasonglTouchRelease", switch mouseUp {
+    | None => (x, y) => ()
+    | Some(fn) => (x, y) => ignore(fn(~button=Events.LeftButton, ~state=Events.MouseUp, ~x=int_of_float(x), ~y=int_of_float(y)))
+    });
   };
 
   type shaderParamsT =
@@ -125,27 +132,8 @@ let module Gl
     ) =>
     Tgls.texImage2D_RGBA(~target, ~level, ~width, ~height, ~border, ~data);
 
-
-  /* TODO implement all of this */
-  let disable = (~context: contextT, int) => failwith("no disable");
-
   let drawElementsInstanced = (~context: contextT, ~mode: int, ~count: int, ~type_: int, ~indices: int, ~primcount: int) =>
-    failwith("no draw elements");
-
-  let texSubImage2D =
-    (
-      ~context: contextT,
-      ~target: int,
-      ~level: int,
-      ~xoffset: int,
-      ~yoffset: int,
-      ~width: int,
-      ~height: int,
-      ~format: int,
-      ~type_: int,
-      ~pixels: Bigarray.Array1.t('a, 'b, Bigarray.c_layout)
-    ) =>
-    failwith("no textsubimage2d");
+    failwith("We're using opengles 2, which doesn't support drawElementsInstanced");
 
   type loadOptionT =
     | LoadAuto
@@ -153,7 +141,6 @@ let module Gl
     | LoadLA
     | LoadRGB
     | LoadRGBA;
-
 
   type imageT = {
     width: int,
@@ -179,18 +166,7 @@ let module Gl
       ~data=image.data
   );
 
-  let getShaderSource = (~context: contextT, shaderT) => failwith("not impl get shader source");
-  let drawArrays = (~context: contextT, ~mode: int, ~first: int, ~count: int) => failwith("no draw arrays");
-
-  let vertexAttribDivisor = (~context: contextT, ~attribute: attributeT, ~divisor: int) => failwith("vertexattribd");
-
-  let uniform2f = (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float) => failwith("uniform2f");
-  let uniform3f =
-    (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float, ~v3: float) => failwith("uniform3f");
-  let uniform4f =
-    (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float, ~v3: float, ~v4: float) =>
-    failwith("uniform4f");
-
+  let vertexAttribDivisor = (~context: contextT, ~attribute: attributeT, ~divisor: int) => failwith("OpenGL ES 2.0 Doesn't support vertexattribdivisor");
 
   module type Bigarray = {
     type t('a, 'b);

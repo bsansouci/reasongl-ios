@@ -42,6 +42,26 @@ external texImage2D_RGBA :
   unit =
   "TglTexImage2D_RGBA_bytecode" "TglTexImage2D_RGBA_native";
 
+
+[@noalloc]
+external texSubImage2D :
+  (
+    ~context: contextT,
+    ~target: int,
+    ~level: int,
+    ~xoffset: int,
+    ~yoffset: int,
+    ~width: int,
+    ~height: int,
+    ~format: int,
+    ~type_: int,
+    ~pixels: Bigarray.Array1.t('a, 'b, Bigarray.c_layout)
+  ) =>
+  unit =
+"TglTexSubImage2D_bytecode" "TglTexSubImage2D_native";
+
+
+
 external readPixels_RGBA :
   (~x: int, ~y: int, ~width: int, ~height: int) =>
   Bigarray.Array1.t(int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) =
@@ -80,6 +100,10 @@ external useProgram : (~context: contextT, programT) => unit = "TglUseProgram";
 external getShaderInfoLog : (~context: contextT, shaderT) => string =
   "TglGetShaderInfoLog";
 
+external getShaderSource : (~context: contextT, shaderT) => string = "TglGetShaderSource";
+
+
+
 external getProgramInfoLog : (~context: contextT, programT) => string =
   "TglGetProgramInfoLog";
 
@@ -91,9 +115,12 @@ external getProgramInfoLog : (~context: contextT, programT) => string =
 type uniformT;
 
 [@noalloc] external uniform1f : (~context: contextT, ~location: uniformT, ~value: float) => unit = "TglUniform1f";
+[@noalloc] external uniform2f : (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float) => unit = "TglUniform2f";
+[@noalloc] external uniform3f : (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float, ~v3: float) => unit = "TglUniform3f";
+[@noalloc] external uniform4f : (~location: uniformT, ~v1: float, ~v2: float, ~v3: float, ~v4: float) => unit = "TglUniform4f";
+let uniform4f = (~context) => uniform4f;
 
-[@noalloc] external uniform1i : (~context: contextT, ~location: uniformT, ~value: int) => unit =
-  "TglUniform1i";
+[@noalloc] external uniform1i : (~context: contextT, ~location: uniformT, ~value: int) => unit = "TglUniform1i";
 
 external getUniformLocation : (~context: contextT, ~program: programT, ~name: string) => uniformT =
   "TglGetUniformLocation";
@@ -106,6 +133,7 @@ type _GLKVertexAttrib =
   | GLKVertexAttribTexCoord1;
 
 [@noalloc] external enable : (~context: contextT, int) => unit = "TglEnable";
+[@noalloc] external disable : (~context: contextT, int) => unit = "TglDisable";
 
 type vertexArrayT;
 
@@ -163,6 +191,9 @@ external vertexAttribPointer :
   unit =
   "TglVertexAttribPointer_bytecode" "TglVertexAttribPointer_native";
 
+/* external vertexAttribDivisor : (~context: contextT, ~attribute: attributeT, ~divisor: int) => unit =
+  "TglVertexAttribDivisor"; */
+
 /*external setProgram : gameViewControllerT => programT => unit = "setProgram";*/
 /*external setUmvp : gameViewControllerT => uniformT => unit = "setUmvp";*/
 /*external setVertexArray : gameViewControllerT => vertexArrayT => unit = "setVertexArray";*/
@@ -172,10 +203,17 @@ external clearColor :
   (~context: contextT, ~r: float, ~g: float, ~b: float, ~a: float) => unit =
   "TglClearColor";
 
-/*external glGenTextures : context::contextT => count::int => array textureT = "TglGenTextures";*/
+[@noalloc] external drawArrays : (~context: contextT, ~mode: int, ~first: int, ~count: int) => unit = "TglDrawArrays";
+
 [@noalloc]
 external drawElements :
   (~context: contextT, ~mode: int, ~count: int, ~type_: int, ~offset: int) => unit =
   "TglDrawElements";
+
+/* [@noalloc]
+  external drawElementsInstanced :
+    (~mode: int, ~count: int, ~type_: int, ~indices: int, ~primcount: int) => unit =
+  "TglDrawElementsInstanced";
+let drawElementsInstanced = (~context) => drawElementsInstanced; */
 
 external getError : unit => int = "TglGetError";

@@ -150,6 +150,13 @@ void TglBindTexture(value context, value kind, value texture) {
 }
 
 /* missing TglTexSubImage2D */
+void TglTexSubImage2D_native(value context, value target, value level, value xoffset, value yoffset, value width, value height, value format, value type, value pixels) {
+  glTexSubImage2D(Int_val(target), Int_val(level), Int_val(xoffset), Int_val(yoffset), Int_val(width), Int_val(height), Int_val(format), Int_val(type), Caml_ba_data_val(pixels));
+}
+
+void TglTexSubImage2D_bytecode(value * argv, int argn) {
+  TglTexSubImage2D_native(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], argv[8], argv[9]);
+}
 
 void TglTexParameteri(value context, value kind, value pname, value param) {
   CAMLparam4(context, kind, pname, param);
@@ -205,6 +212,18 @@ void TglUniform1f(value context, value location, value v) {
   glUniform1f(Int_val(location), Double_val(v));
 }
 
+void TglUniform2f(value location, value v1, value v2) {
+  glUniform2f(Int_val(location), Double_val(v1), Double_val(v2));
+}
+
+void TglUniform3f(value location, value v1, value v2, value v3) {
+  glUniform3f(Int_val(location), Double_val(v1), Double_val(v2), Double_val(v3));
+}
+
+void TglUniform4f(value location, value v1, value v2, value v3, value v4) {
+  glUniform4f(Int_val(location), Double_val(v1), Double_val(v2), Double_val(v3), Double_val(v4));
+}
+
 void bufferData(value context, value constant, value data, value usage) {
   glBufferData(Int_val(constant), caml_ba_byte_size(Caml_ba_array_val(data)), Caml_ba_data_val(data), Int_val(usage));
 }
@@ -230,6 +249,11 @@ CAMLprim value TglGetAttribLocation(value context, value program, value name) {
 void TglEnableVertexAttribArray(value context, value attrib) {
   glEnableVertexAttribArray(Int_val(attrib));
 }
+
+// OpenGL ES 2.0 doesn't have vertexattribdivisor
+// void TglVertexAttribDivisor(value context, value attrib, value divisor) {
+//   glVertexAttribDivisor(Int_val(attrib), Int_val(divisor));
+// }
 
 void TglVertexAttribPointer_native(value context, value index, value size, value typ, value normalized, value stride, value offset) {
   long o = (long)Int_val(offset);
@@ -302,7 +326,7 @@ void TglDrawElements(value context, value mode, value first, value typ, value of
   glDrawElements(Int_val(mode), Int_val(first), Int_val(typ), (const GLvoid *)o);
 }
 
-// Missing TglDrawElementsInstanced
+// OpenGL ES 2.0 doesn't have support for glDrawElementsInstanced.
 // void TglDrawElementsInstanced(value mode, value first, value typ, value indices, value primcount) {
 //   long o = (long)Int_val(indices);
 //   glDrawElementsInstanced(Int_val(mode), Int_val(first), Int_val(typ), (const GLvoid *)o, Int_val(primcount));

@@ -36,19 +36,21 @@ type state = {
   time: int,
   background: imageT,
   flappy: imageT,
+  pos: (int, int),
 };
 
 let setup = (env) => {
   Env.size(~width=375, ~height=667, env);
-  let lst = Array.init(500, (_) => make(Env.width(env), ((-500), (-50)), 0));
+  let lst = Array.init(50, (_) => make(Env.width(env), ((-500), (-50)), 0));
   {
     lst, time: 0, running: true,
     background: Reprocessing.Draw.loadImage(~filename="background.png", env),
-    flappy: Reprocessing.Draw.loadImage(~filename="flappy-base.png", env)
+    flappy: Reprocessing.Draw.loadImage(~filename="flappy-base.png", env),
+    pos: (100, 100),
   }
 };
 
-let draw = ({lst, running, time} as state, env) => {
+let draw = ({lst, running, time, pos} as state, env) => {
   Draw.background(Utils.color(~r=230, ~g=230, ~b=250, ~a=255), env);
   /*Draw.fill (Utils.color r::100 g::0 b::0) env;*/
   Utils.randomSeed(time);
@@ -76,20 +78,17 @@ let draw = ({lst, running, time} as state, env) => {
     lst
   );
   Draw.image(state.background, ~pos=(0, 0), env);
-  Draw.image(state.flappy, ~pos=(100, 100), env);
+  Draw.image(state.flappy, ~pos=pos, env);
   {...state, lst, running, time: running ? time + 1 : time}
 };
 
-/*let mouseDown state _env => {...state, running: false};
-
-  let mouseUp state _env => {...state, running: true};
-
-  let mouseDragged ({time} as state) env => {
-    let (pmouseX, _) = Env.pmouse env;
-    let (mouseX, _) = Env.mouse env;
-    let newTime = time - (pmouseX - mouseX);
-    {...state, time: newTime}
-  };*/
-/*run ::setup ::draw ::mouseDown ::mouseUp ::mouseDragged ();*/
-
-run(~setup, ~draw, ());
+run(~setup, ~draw, ~mouseDown=(state, env) => {
+  let (x, y) = Env.mouse(env);
+  {...state, pos: (x, y)}
+}, ~mouseDragged=(state, env) => {
+  let (x, y) = Env.mouse(env);
+  {...state, pos: (x, y)}
+}, ~mouseUp=(state, env) => {
+  let (x, y) = Env.mouse(env);
+  {...state, pos: (x, y)}
+}, ());

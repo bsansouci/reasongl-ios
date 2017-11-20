@@ -128,6 +128,33 @@ void reasonglUpdate(GameViewController *s) {
   caml_callback(*closure_f, caml_copy_double(s.timeSinceLastDraw));
 }
 
+void reasonglTouchPress(double x, double y) {
+  static dispatch_once_t onceToken;
+  static value *closure_f;
+  dispatch_once(&onceToken, ^{
+    closure_f = caml_named_value("reasonglTouchPress");
+  });
+  caml_callback2(*closure_f, caml_copy_double(x), caml_copy_double(y));
+}
+
+void reasonglTouchDrag(double x, double y) {
+  static dispatch_once_t onceToken;
+  static value *closure_f;
+  dispatch_once(&onceToken, ^{
+    closure_f = caml_named_value("reasonglTouchDrag");
+  });
+  caml_callback2(*closure_f, caml_copy_double(x), caml_copy_double(y));
+}
+
+void reasonglTouchRelease(double x, double y) {
+  static dispatch_once_t onceToken;
+  static value *closure_f;
+  dispatch_once(&onceToken, ^{
+    closure_f = caml_named_value("reasonglTouchRelease");
+  });
+  caml_callback2(*closure_f, caml_copy_double(x), caml_copy_double(y));
+}
+
 void Mat4_ortho_native(value out, value left, value right, value bottom, value top, value near, value far) {
   CAMLparam5(out, left, right, bottom, top);
   CAMLxparam2(near, far);

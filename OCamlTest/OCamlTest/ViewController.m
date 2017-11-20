@@ -12,6 +12,9 @@
 
 extern void reasonglMain(GameViewController *this);
 extern void reasonglUpdate(GameViewController *this);
+extern void reasonglTouchPress(double x, double y);
+extern void reasonglTouchRelease(double x, double y);
+extern void reasonglTouchDrag(double x, double y);
 
 @interface GameViewController ()
 
@@ -62,6 +65,35 @@ extern void reasonglUpdate(GameViewController *this);
 }
 
 #pragma mark - GLKView and GLKViewController delegate methods
+
+- (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	[super touchesBegan:touches withEvent:event];
+	UITouch* touchEvent = [touches anyObject];
+	CGPoint locationInView = [touchEvent locationInView:self.view];
+	reasonglTouchPress(locationInView.x, locationInView.y);
+}
+
+- (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	[super touchesMoved:touches withEvent:event];
+	UITouch* touchEvent = [touches anyObject];
+	CGPoint locationInView = [touchEvent locationInView:self.view];
+	reasonglTouchDrag(locationInView.x, locationInView.y);
+}
+
+- (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	[super touchesEnded:touches withEvent:event];
+	UITouch* touchEvent = [touches anyObject];
+	CGPoint locationInView = [touchEvent locationInView:self.view];
+	reasonglTouchRelease(locationInView.x, locationInView.y);
+}
+
+- (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
+{
+	[super touchesCancelled:touches withEvent:event];
+}
 
 - (void)update {
 	reasonglUpdate(self);
