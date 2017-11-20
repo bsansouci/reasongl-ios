@@ -24,7 +24,7 @@ let foi = float_of_int;
 
 let lookup_table: ref(array(int)) = ref([||]);
 
-let color = (~r, ~g, ~b) : colorT => {r, g, b};
+let color = (~r, ~g, ~b, ~a) : colorT => {r, g, b};
 
 /*Calculation Functions*/
 let round = (i) => floor(i +. 0.5);

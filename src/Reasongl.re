@@ -1,6 +1,6 @@
 let module Gl
 /* Uncomment this to see what still needs to be done */
-/* : RGLInterface.t */
+: RGLInterface.t
  = {
   include Bindings;
   include Tgls;
@@ -31,9 +31,9 @@ let module Gl
     let getWidth = (window) => 375; /** TODO make general */
     let getHeight = (window) => 667;
     /** TODO these are probably wrong */
-    let getPixelWidth = (window) => getWidth(window) * 2;
-    let getPixelHeight = (window) => getHeight(window) * 2;
-    let getPixelScale = (window) => 2.;
+    let getPixelWidth = (window) => getWidth(window);
+    let getPixelHeight = (window) => getHeight(window);
+    let getPixelScale = (window) => 1.;
 
     let setWindowSize = (~window, ~width, ~height) => {
       /* umm this can't happen.
@@ -56,6 +56,7 @@ let module Gl
           let view = getView(vc);
           setContext(view, context);
           setDrawableDepthFormat(view, GLKViewDrawableDepthFormat24);
+          setCurrentContext(context);
           cb({viewController: vc, context})
         };
       })
@@ -77,6 +78,101 @@ let module Gl
       Nothing
     }
   };
+
+  type shaderParamsT =
+    | Shader_delete_status
+    | Compile_status
+    | Shader_type;
+  type programParamsT =
+    | Program_delete_status
+    | Link_status
+    | Validate_status;
+  let _getProgramParameter = (~context, ~program: programT, ~paramName) =>
+    getProgramiv(~context, ~program, ~pname=paramName);
+  let getProgramParameter = (~context, ~program: programT, ~paramName) =>
+    switch paramName {
+    | Program_delete_status =>
+      _getProgramParameter(~context, ~program, ~paramName=GLConstants.gl_delete_status)
+    | Link_status => _getProgramParameter(~context, ~program, ~paramName=GLConstants.gl_link_status)
+    | Validate_status => _getProgramParameter(~context, ~program, ~paramName=GLConstants.gl_validate_status)
+    };
+  let _getShaderParameter = (~context, ~shader, ~paramName) =>
+    getShaderiv(~context, ~shader, ~pname=paramName);
+  let getShaderParameter = (~context, ~shader, ~paramName) =>
+    switch paramName {
+    | Shader_delete_status =>
+      _getShaderParameter(~context, ~shader, ~paramName=GLConstants.gl_delete_status)
+    | Compile_status => _getShaderParameter(~context, ~shader, ~paramName=GLConstants.gl_compile_status)
+    | Shader_type => _getShaderParameter(~context, ~shader, ~paramName=GLConstants.gl_shader_type)
+};
+  let shaderSource = (~context, ~shader, ~source) => {
+    Tgls.shaderSource(~context, ~shader, ~source=[|source|])
+  };
+
+  let readPixels_RGBA = (~context as _, ~x, ~y, ~width, ~height) =>
+    Tgls.readPixels_RGBA(~x, ~y, ~width, ~height);
+  let createTexture = (~context: contextT) => Tgls.genTexture(~context);
+
+  let texImage2D_RGBA =
+    (
+      ~context: contextT,
+      ~target: int,
+      ~level: int,
+      ~width: int,
+      ~height: int,
+      ~border: int,
+      ~data: Bigarray.Array1.t('a, 'b, Bigarray.c_layout)
+    ) =>
+    Tgls.texImage2D_RGBA(~target, ~level, ~width, ~height, ~border, ~data);
+
+
+  /* TODO implement all of this */
+  let disable = (~context: contextT, int) => failwith("no disable");
+
+  let drawElementsInstanced = (~context: contextT, ~mode: int, ~count: int, ~type_: int, ~indices: int, ~primcount: int) =>
+    failwith("no draw elements");
+
+  let texSubImage2D =
+    (
+      ~context: contextT,
+      ~target: int,
+      ~level: int,
+      ~xoffset: int,
+      ~yoffset: int,
+      ~width: int,
+      ~height: int,
+      ~format: int,
+      ~type_: int,
+      ~pixels: Bigarray.Array1.t('a, 'b, Bigarray.c_layout)
+    ) =>
+    failwith("no textsubimage2d");
+  type imageT;
+  let getImageWidth = (image) => failwith("Not impl getImageWidth");
+  let getImageHeight = (image) => failwith("Not impl getImageHeight");
+
+  type loadOptionT =
+    | LoadAuto
+    | LoadL
+    | LoadLA
+    | LoadRGB
+    | LoadRGBA;
+  let loadImage =
+    (~filename: string, ~loadOption=?, ~callback: option(imageT) => unit, unit) =>
+    failwith("Not impl loadImage");
+  let texImage2DWithImage = (~context: contextT, ~target: int, ~level: int, ~image: imageT) => failwith("not textimage2dwithimage");
+
+  let getShaderSource = (~context: contextT, shaderT) => failwith("not impl get shader source");
+  let drawArrays = (~context: contextT, ~mode: int, ~first: int, ~count: int) => failwith("no draw arrays");
+
+  let vertexAttribDivisor = (~context: contextT, ~attribute: attributeT, ~divisor: int) => failwith("vertexattribd");
+
+  let uniform2f = (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float) => failwith("uniform2f");
+  let uniform3f =
+    (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float, ~v3: float) => failwith("uniform3f");
+  let uniform4f =
+    (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float, ~v3: float, ~v4: float) =>
+    failwith("uniform4f");
+
 
   module type Bigarray = {
     type t('a, 'b);
@@ -112,71 +208,79 @@ let module Gl
     let sub: (t('a, 'b), ~offset: int, ~len: int) => t('a, 'b);
   };
 
-  module Bigarray = Bigarray;
-
-
-
-
-  /* TODO implement all of this */
-  let disable = (~context: contextT, int) => ();
-  let texParameteri = (~context: contextT, ~target: int, ~pname: int, ~param: int) => ();
-  let createTexture = (~context: contextT) => failwith("Cannot create texture");
-  let activeTexture = (~context: contextT, int) => ();
-  let bindTexture = (~context: contextT, ~target: int, ~texture: textureT) => ();
-
-  let drawElementsInstanced = (~context: contextT, ~mode: int, ~count: int, ~type_: int, ~indices: int, ~primcount: int) =>
-    ();
-
-  let texSubImage2D =
-    (
-      ~context: contextT,
-      ~target: int,
-      ~level: int,
-      ~xoffset: int,
-      ~yoffset: int,
-      ~width: int,
-      ~height: int,
-      ~format: int,
-      ~type_: int,
-      ~pixels: Bigarray.t('a, 'b)
-    ) =>
-    ();
-  let readPixels_RGBA =
-    (~context: contextT, ~x: int, ~y: int, ~width: int, ~height: int) =>
-    failwith("Cannot read pixels");
-  type imageT;
-  let getImageWidth = (image) => failwith("Not impl");
-  let getImageHeight = (image) => failwith("Not impl");
-
-  type loadOptionT =
-    | LoadAuto
-    | LoadL
-    | LoadLA
-    | LoadRGB
-    | LoadRGBA;
-  let loadImage =
-    (~filename: string, ~loadOption, ~callback: option(imageT) => unit, unit) =>
-    failwith("Not impl");
-  let texImage2DWithImage = (~context: contextT, ~target: int, ~level: int, ~image: imageT) => ();
-
-
-  let shaderSource = (~context, ~shader, ~source) => {
-    Tgls.shaderSource(~context, ~shader, ~source=[|source|])
+    module Bigarray = {
+      type t('a, 'b) = Bigarray.Array1.t('a, 'b, Bigarray.c_layout);
+      type float64_elt = Bigarray.float64_elt;
+      type float32_elt = Bigarray.float32_elt;
+      type int16_unsigned_elt = Bigarray.int16_unsigned_elt;
+      type int16_signed_elt = Bigarray.int16_signed_elt;
+      type int8_unsigned_elt = Bigarray.int8_unsigned_elt;
+      type int8_signed_elt = Bigarray.int8_signed_elt;
+      type int_elt = Bigarray.int_elt;
+      type int32_elt = Bigarray.int32_elt;
+      type int64_elt = Bigarray.int64_elt;
+      type kind('a, 'b) =
+        | Float64: kind(float, float64_elt)
+        | Float32: kind(float, float32_elt)
+        | Int16: kind(int, int16_signed_elt)
+        | Uint16: kind(int, int16_unsigned_elt)
+        | Int8: kind(int, int8_signed_elt)
+        | Uint8: kind(int, int8_unsigned_elt)
+        | Char: kind(char, int8_unsigned_elt)
+        | Int: kind(int, int_elt)
+        | Int64: kind(int64, int64_elt)
+        | Int32: kind(int32, int32_elt);
+      let create = (type a, type b, kind: kind(a, b), size) : t(a, b) =>
+        switch kind {
+        | Float64 => Bigarray.Array1.create(Bigarray.Float64, Bigarray.c_layout, size)
+        | Float32 => Bigarray.Array1.create(Bigarray.Float32, Bigarray.c_layout, size)
+        | Int16 => Bigarray.Array1.create(Bigarray.Int16_signed, Bigarray.c_layout, size)
+        | Uint16 => Bigarray.Array1.create(Bigarray.Int16_unsigned, Bigarray.c_layout, size)
+        | Int8 => Bigarray.Array1.create(Bigarray.Int8_signed, Bigarray.c_layout, size)
+        | Uint8 => Bigarray.Array1.create(Bigarray.Int8_unsigned, Bigarray.c_layout, size)
+        | Char => Bigarray.Array1.create(Bigarray.Char, Bigarray.c_layout, size)
+        | Int => Bigarray.Array1.create(Bigarray.Int, Bigarray.c_layout, size)
+        | Int64 => Bigarray.Array1.create(Bigarray.Int64, Bigarray.c_layout, size)
+        | Int32 => Bigarray.Array1.create(Bigarray.Int32, Bigarray.c_layout, size)
+        };
+      let of_array = (type a, type b, kind: kind(a, b), arr: array(a)) : t(a, b) =>
+        switch kind {
+        | Float64 => Bigarray.Array1.of_array(Bigarray.Float64, Bigarray.c_layout, arr)
+        | Float32 => Bigarray.Array1.of_array(Bigarray.Float32, Bigarray.c_layout, arr)
+        | Int16 => Bigarray.Array1.of_array(Bigarray.Int16_signed, Bigarray.c_layout, arr)
+        | Uint16 => Bigarray.Array1.of_array(Bigarray.Int16_unsigned, Bigarray.c_layout, arr)
+        | Int8 => Bigarray.Array1.of_array(Bigarray.Int8_signed, Bigarray.c_layout, arr)
+        | Uint8 => Bigarray.Array1.of_array(Bigarray.Int8_unsigned, Bigarray.c_layout, arr)
+        | Char => Bigarray.Array1.of_array(Bigarray.Char, Bigarray.c_layout, arr)
+        | Int => Bigarray.Array1.of_array(Bigarray.Int, Bigarray.c_layout, arr)
+        | Int64 => Bigarray.Array1.of_array(Bigarray.Int64, Bigarray.c_layout, arr)
+        | Int32 => Bigarray.Array1.of_array(Bigarray.Int32, Bigarray.c_layout, arr)
+        };
+      let dim = Bigarray.Array1.dim;
+      let blit = Bigarray.Array1.blit;
+      /* "What is going on here" you may ask.
+         Well we kinda sorta profiled the app and noticed that ba_caml_XYZ was called a lot.
+         This is an attempt at reducing the cost of those calls. We implemented our own C blit (
+         which is just memcpy)
+                  Ben - August 28th 2017
+            */
+      [@noalloc]
+      external unsafe_blit :
+        (
+          Bigarray.Array1.t('a, 'b, 'c),
+          Bigarray.Array1.t('a, 'b, 'c),
+          ~offset: int,
+          ~numOfBytes: int
+        ) =>
+        unit =
+        "bigarray_unsafe_blit";
+      let get = Bigarray.Array1.get;
+      let unsafe_get = Bigarray.Array1.unsafe_get;
+      let set = Bigarray.Array1.set;
+      let unsafe_set = Bigarray.Array1.unsafe_set;
+      let sub = (type a, type b, arr: t(a, b), ~offset, ~len) : t(a, b) =>
+        Bigarray.Array1.sub(arr, offset, len);
   };
-  let getShaderSource = (~context: contextT, shaderT) => failwith("not impl");
-  let drawArrays = (~context: contextT, ~mode: int, ~first: int, ~count: int) => ();
-
-  type shaderParamsT =
-    | Shader_delete_status
-    | Compile_status
-    | Shader_type;
-  type programParamsT =
-    | Program_delete_status
-    | Link_status
-    | Validate_status;
-  let getProgramParameter =
-    (~context: contextT, ~program: programT, ~paramName: programParamsT) => failwith("not impl");
-  let getShaderParameter = (~context: contextT, ~shader: shaderT, ~paramName: shaderParamsT) => failwith("not impl");
 
   module type Mat4T = {
     type t;
@@ -200,38 +304,194 @@ let module Gl
   };
 
   module Mat4: Mat4T = {
-    type t = unit;
-    let to_array = (()) => [||];
-    let create = () => ();
-    let identity: (~out: t) => t = (~out) => ();
-    let translate = (~out, ~matrix, ~vec) => ();
-    let scale = (~out, ~matrix, ~vec) => ();
-    let rotate = (~out, ~matrix, ~rad, ~vec) => ();
-    let ortho = (~out, ~left, ~right, ~bottom, ~top, ~near, ~far) => ();
+    type t = array(float);
+    let to_array = (a) => a;
+    let epsilon = 0.00001;
+    let create = () => [|
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    |];
+    let identity = (~out: t) => {
+      out[0] = 1.0;
+      out[1] = 0.0;
+      out[2] = 0.0;
+      out[3] = 0.0;
+      out[4] = 0.0;
+      out[5] = 1.0;
+      out[6] = 0.0;
+      out[7] = 0.0;
+      out[8] = 0.0;
+      out[9] = 0.0;
+      out[10] = 1.0;
+      out[11] = 0.0;
+      out[12] = 0.0;
+      out[13] = 0.0;
+      out[14] = 0.0;
+      out[15] = 1.0
+    };
+    let translate = (~out: t, ~matrix: t, ~vec: array(float)) => {
+      let x = vec[0];
+      let y = vec[1];
+      let z = vec[2];
+      if (matrix === out) {
+        out[12] = matrix[0] *. x +. matrix[4] *. y +. matrix[8] *. z +. matrix[12];
+        out[13] = matrix[1] *. x +. matrix[5] *. y +. matrix[9] *. z +. matrix[13];
+        out[14] = matrix[2] *. x +. matrix[6] *. y +. matrix[10] *. z +. matrix[14];
+        out[15] = matrix[3] *. x +. matrix[7] *. y +. matrix[11] *. z +. matrix[15]
+      } else {
+        let a00 = matrix[0];
+        let a01 = matrix[1];
+        let a02 = matrix[2];
+        let a03 = matrix[3];
+        let a10 = matrix[4];
+        let a11 = matrix[5];
+        let a12 = matrix[6];
+        let a13 = matrix[7];
+        let a20 = matrix[8];
+        let a21 = matrix[9];
+        let a22 = matrix[10];
+        let a23 = matrix[11];
+        out[0] = a00;
+        out[1] = a01;
+        out[2] = a02;
+        out[3] = a03;
+        out[4] = a10;
+        out[5] = a11;
+        out[6] = a12;
+        out[7] = a13;
+        out[8] = a20;
+        out[9] = a21;
+        out[10] = a22;
+        out[11] = a23;
+        out[12] = a00 *. x +. a10 *. y +. a20 *. z +. matrix[12];
+        out[13] = a01 *. x +. a11 *. y +. a21 *. z +. matrix[13];
+        out[14] = a02 *. x +. a12 *. y +. a22 *. z +. matrix[14];
+        out[15] = a03 *. x +. a13 *. y +. a23 *. z +. matrix[15]
+      }
+    };
+    let scale = (~out: t, ~matrix: t, ~vec: array(float)) => {
+      let x = vec[0];
+      let y = vec[1];
+      let z = vec[2];
+      out[0] = matrix[0] *. x;
+      out[1] = matrix[1] *. x;
+      out[2] = matrix[2] *. x;
+      out[3] = matrix[3] *. x;
+      out[4] = matrix[4] *. y;
+      out[5] = matrix[5] *. y;
+      out[6] = matrix[6] *. y;
+      out[7] = matrix[7] *. y;
+      out[8] = matrix[8] *. z;
+      out[9] = matrix[9] *. z;
+      out[10] = matrix[10] *. z;
+      out[11] = matrix[11] *. z;
+      out[12] = matrix[12];
+      out[13] = matrix[13];
+      out[14] = matrix[14];
+      out[15] = matrix[15]
+    };
+    let rotate = (~out: t, ~matrix: t, ~rad: float, ~vec: array(float)) => {
+      let x = vec[0];
+      let y = vec[1];
+      let z = vec[2];
+      let len = sqrt(x *. x +. y *. y +. z *. z);
+      if (abs_float(len) > epsilon) {
+        let len = 1. /. sqrt(x *. x +. y *. y +. z *. z);
+        let x = matrix[0] *. len;
+        let y = matrix[1] *. len;
+        let z = matrix[2] *. len;
+        let s = sin(rad);
+        let c = cos(rad);
+        let t = 1. -. c;
+        let a00 = matrix[0];
+        let a01 = matrix[1];
+        let a02 = matrix[2];
+        let a03 = matrix[3];
+        let a10 = matrix[4];
+        let a11 = matrix[5];
+        let a12 = matrix[6];
+        let a13 = matrix[7];
+        let a20 = matrix[8];
+        let a21 = matrix[9];
+        let a22 = matrix[10];
+        let a23 = matrix[11];
+        let b00 = x *. x *. t +. c;
+        let b01 = y *. x *. t +. z *. s;
+        let b02 = z *. x *. t -. y *. s;
+        let b10 = x *. y *. t -. y *. s;
+        let b11 = y *. y *. t -. c;
+        let b12 = z *. y *. t +. x *. s;
+        let b20 = x *. z *. t +. y *. s;
+        let b21 = y *. z *. t -. x *. s;
+        let b22 = z *. z *. t +. c;
+        matrix[0] = a00 *. b00 +. a10 *. b01 +. a20 *. b02;
+        matrix[1] = a01 *. b00 +. a11 *. b01 +. a21 *. b02;
+        matrix[2] = a02 *. b00 +. a12 *. b01 +. a22 *. b02;
+        matrix[3] = a03 *. b00 +. a13 *. b01 +. a23 *. b02;
+        matrix[4] = a00 *. b10 +. a10 *. b11 +. a20 *. b12;
+        matrix[5] = a01 *. b10 +. a11 *. b11 +. a21 *. b12;
+        matrix[6] = a02 *. b10 +. a12 *. b11 +. a22 *. b12;
+        matrix[7] = a03 *. b10 +. a13 *. b11 +. a23 *. b12;
+        matrix[8] = a00 *. b20 +. a10 *. b21 +. a20 *. b22;
+        matrix[9] = a01 *. b20 +. a11 *. b21 +. a21 *. b22;
+        matrix[10] = a02 *. b20 +. a12 *. b21 +. a22 *. b22;
+        matrix[11] = a03 *. b20 +. a13 *. b21 +. a23 *. b22
+      };
+      if (matrix !== out) {
+        out[12] = matrix[12];
+        out[13] = matrix[13];
+        out[14] = matrix[14];
+        out[15] = matrix[15]
+      }
+    };
+    let ortho =
+        (
+          ~out: t,
+          ~left: float,
+          ~right: float,
+          ~bottom: float,
+          ~top: float,
+          ~near: float,
+          ~far: float
+        ) => {
+      let lr = 1. /. (left -. right);
+      let bt = 1. /. (bottom -. top);
+      let nf = 1. /. (near -. far);
+      out[0] = (-2.) *. lr;
+      out[1] = 0.;
+      out[2] = 0.;
+      out[3] = 0.;
+      out[4] = 0.;
+      out[5] = (-2.) *. bt;
+      out[6] = 0.;
+      out[7] = 0.;
+      out[8] = 0.;
+      out[9] = 0.;
+      out[10] = 2. *. nf;
+      out[11] = 0.;
+      out[12] = (left +. right) *. lr;
+      out[13] = (top +. bottom) *. bt;
+      out[14] = (far +. near) *. nf;
+      out[15] = 1.
+    };
   };
 
-  let vertexAttribDivisor = (~context: contextT, ~attribute: attributeT, ~divisor: int) => ();
-
-  let uniform2f = (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float) => ();
-  let uniform3f =
-    (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float, ~v3: float) => ();
-  let uniform4f =
-    (~context: contextT, ~location: uniformT, ~v1: float, ~v2: float, ~v3: float, ~v4: float) =>
-    ();
-  let texImage2D_RGBA =
-    (
-      ~context: contextT,
-      ~target: int,
-      ~level: int,
-      ~width: int,
-      ~height: int,
-      ~border: int,
-      ~data: Bigarray.t('a, 'b)
-    ) =>
-    ();
-
-
-
+  let uniformMatrix4fv = (~context, ~location, ~value: Mat4.t) =>
+  Tgls.uniformMatrix4fv(~context, ~location, ~transpose=false, ~value=Mat4.to_array(value));
 
 };
 

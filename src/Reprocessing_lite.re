@@ -4,6 +4,8 @@ open Bindings;
 
 open Tgls;
 
+
+
 /*let render
       ::window
       ::mouseDown
@@ -177,8 +179,8 @@ module Reprocessing_Shaders = {
 type glCamera = {projectionMatrix: Mat4.t};
 
 type batchT = {
-  vertexArray: Bigarray.t(float, Bigarray.float32_elt),
-  elementArray: Bigarray.t(int, Bigarray.int16_unsigned_elt),
+  vertexArray: Bigarray.Array1.t(float, Bigarray.float32_elt, Bigarray.c_layout),
+  elementArray: Bigarray.Array1.t(int, Bigarray.int16_unsigned_elt, Bigarray.c_layout),
   mutable vertexPtr: int,
   mutable elementPtr: int
 };
@@ -227,7 +229,7 @@ let setupGL = (vc, context) => {
   setCurrentContext(context);
   viewport(~context, ~x=(-1), ~y=(-1), ~width=Env.width(), ~height=Env.height());
   clearColor(~context, ~r=0., ~g=0., ~b=0., ~a=1.);
-  clear(~context, 16384 lor 256);
+  clear(~context, ~mask=16384 lor 256);
 
   /*** Camera is a simple record containing one matrix used to project a point in 3D onto the screen. **/
   let camera = {projectionMatrix: Mat4.create()};
@@ -238,15 +240,15 @@ let setupGL = (vc, context) => {
   let vertexShader = createShader(~context, gl_vertex_shader);
   shaderSource(~context, ~shader=vertexShader, ~source=[|vertexShaderSource|]);
   compileShader(~context, vertexShader);
-  print_endline @@ "vertexShader logs: " ++ getShaderInfoLog(~context, ~shader=vertexShader);
+  print_endline @@ "vertexShader logs: " ++ getShaderInfoLog(~context, vertexShader);
   attachShader(~context, ~program, ~shader=vertexShader);
   let fragmentShader = createShader(~context, gl_fragment_shader);
   shaderSource(~context, ~shader=fragmentShader, ~source=[|fragmentShaderSource|]);
   compileShader(~context, fragmentShader);
-  print_endline @@ "fragmentShader logs: " ++ getShaderInfoLog(~context, ~shader=fragmentShader);
+  print_endline @@ "fragmentShader logs: " ++ getShaderInfoLog(~context, fragmentShader);
   attachShader(~context, ~program, ~shader=fragmentShader);
   linkProgram(~context, program);
-  print_endline @@ "program logs: " ++ getProgramInfoLog(~context, ~program);
+  print_endline @@ "program logs: " ++ getProgramInfoLog(~context, program);
   deleteShader(~context, vertexShader);
   deleteShader(~context, fragmentShader);
   /*setProgram vc program;*/
@@ -259,7 +261,7 @@ let setupGL = (vc, context) => {
   enableVertexAttribArray(~context, ~attribute=aVertexColor);
   let pMatrixUniform = getUniformLocation(~context, ~program, ~name="uPMatrix");
   /* @HACK this function is fuckd */
-  uniformMatrix4fv(
+  uniformMatrix4fv_glk(
     ~context,
     ~location=pMatrixUniform,
     ~transpose=false,
@@ -327,8 +329,8 @@ let setupGL = (vc, context) => {
     vertexArrayPtr: genVertexArray(~context),
     gl: context,
     batch: {
-      vertexArray: Bigarray.create(Bigarray.Float32, circularBufferSize * vertexSize),
-      elementArray: Bigarray.create(Bigarray.Uint16, circularBufferSize),
+      vertexArray: Bigarray.Array1.create(Bigarray.Float32, Bigarray.c_layout, circularBufferSize * vertexSize),
+      elementArray: Bigarray.Array1.create(Bigarray.Int16_unsigned, Bigarray.c_layout, circularBufferSize),
       vertexPtr: 0,
       elementPtr: 0
     },
@@ -348,8 +350,8 @@ let setupGL = (vc, context) => {
 
 let drawGeometry =
     (
-      ~vertexArray: Bigarray.t(float, Bigarray.float32_elt),
-      ~elementArray: Bigarray.t(int, Bigarray.int16_unsigned_elt),
+      ~vertexArray: Bigarray.Array1.t(float, Bigarray.float32_elt, Bigarray.c_layout),
+      ~elementArray: Bigarray.Array1.t(int, Bigarray.int16_unsigned_elt, Bigarray.c_layout),
       ~mode,
       ~count,
       /*::textureBuffer*/
@@ -409,7 +411,7 @@ let drawGeometry =
     ~data=elementArray,
     ~usage=gl_stream_draw
   );
-  uniformMatrix4fv(
+  uniformMatrix4fv_glk(
     ~context=env.gl,
     ~location=env.pMatrixUniform,
     ~transpose=false,
@@ -433,11 +435,11 @@ let flushGlobalBatch = (env) =>
       | Some textureBuffer => textureBuffer
       };*/
     clearColor(~context=env.gl, ~r=1., ~g=0., ~b=0., ~a=1.);
-    clear(~context=env.gl, 16384 lor 256);
+    clear(~context=env.gl, ~mask=16384 lor 256);
     drawGeometry(
-      ~vertexArray=Bigarray.subFloat32(env.batch.vertexArray, ~offset=0, ~len=env.batch.vertexPtr),
+      ~vertexArray=Bigarray.Array1.sub(env.batch.vertexArray, 0, env.batch.vertexPtr),
       ~elementArray=
-        Bigarray.subUnit16(env.batch.elementArray, ~offset=0, ~len=env.batch.elementPtr),
+        Bigarray.Array1.sub(env.batch.elementArray, 0, env.batch.elementPtr),
       ~mode=gl_triangles,
       ~count=env.batch.elementPtr,
       /*::textureBuffer*/
@@ -483,7 +485,7 @@ let addRectToGlobalBatch =
       ~color as {r, g, b}
     ) => {
   /*maybeFlushBatch texture::None el::6 vert::32 env;*/
-  let setFloat32 = Bigarray.setFloat32;
+  let setFloat32 = Bigarray.Array1.set;
   let (r, g, b) = (toColorFloat(r), toColorFloat(g), toColorFloat(b));
   let i = env.batch.vertexPtr;
   let vertexArrayToMutate = env.batch.vertexArray;
@@ -522,7 +524,7 @@ let addRectToGlobalBatch =
   let ii = i / vertexSize;
   let j = env.batch.elementPtr;
   let elementArrayToMutate = env.batch.elementArray;
-  let setUint16 = Bigarray.setUint16;
+  let setUint16 = Bigarray.Array1.set;
   setUint16(elementArrayToMutate, j + 0, ii);
   setUint16(elementArrayToMutate, j + 1, ii + 1);
   setUint16(elementArrayToMutate, j + 2, ii + 2);

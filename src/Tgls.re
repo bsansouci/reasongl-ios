@@ -7,9 +7,12 @@ external genTextures : (~context: contextT, int) => array(textureT) = "TglGenTex
 
 external genTexture : (~context: contextT) => textureT = "TglGenTexture";
 
+external activeTexture : (~context: contextT, int) => unit = "TglActiveTexture";
+
+external bindTexture : (~context: contextT, ~target: int, ~texture: textureT) => unit = "TglBindTexture";
+
 [@noalloc] external blendFunc : (~context: contextT, int, int) => unit =
   "TglBlendFunc";
-
 
 /* type programT; */
 /* external glCreateProgram : unit => programT = "glCreateProgramwrapper"; */
@@ -25,7 +28,31 @@ type programT;
 
 type shaderT;
 
-[@noalloc] external clear : (~context: contextT, int) => unit = "TglClear";
+
+[@noalloc]
+external texImage2D_RGBA :
+  (
+    ~target: int,
+    ~level: int,
+    ~width: int,
+    ~height: int,
+    ~border: int,
+    ~data: Bigarray.Array1.t('a, 'b, Bigarray.c_layout)
+  ) =>
+  unit =
+  "TglTexImage2D_RGBA_bytecode" "TglTexImage2D_RGBA_native";
+
+external readPixels_RGBA :
+  (~x: int, ~y: int, ~width: int, ~height: int) =>
+  Bigarray.Array1.t(int, Bigarray.int8_unsigned_elt, Bigarray.c_layout) =
+"TglReadPixels_RGBA";
+
+
+[@noalloc] external texParameteri : (~context: contextT, ~target: int, ~pname: int, ~param: int) => unit =
+"TglTexParameteri";
+
+
+[@noalloc] external clear : (~context: contextT, ~mask: int) => unit = "TglClear";
 
 [@noalloc]
 external viewport : (~context: contextT, ~x: int, ~y: int, ~width: int, ~height: int) => unit =
@@ -50,15 +77,20 @@ external linkProgram : (~context: contextT, programT) => unit = "TglLinkProgram"
 
 external useProgram : (~context: contextT, programT) => unit = "TglUseProgram";
 
-external getShaderInfoLog : (~context: contextT, ~shader: shaderT) => string =
+external getShaderInfoLog : (~context: contextT, shaderT) => string =
   "TglGetShaderInfoLog";
 
-external getProgramInfoLog : (~context: contextT, ~program: programT) => string =
+external getProgramInfoLog : (~context: contextT, programT) => string =
   "TglGetProgramInfoLog";
+
+
+[@noalloc] external getProgramiv : (~context: contextT, ~program: programT, ~pname: int) => int = "TglGetProgramiv";
+
+[@noalloc] external getShaderiv : (~context: contextT, ~shader: shaderT, ~pname: int) => int = "TglGetShaderiv";
 
 type uniformT;
 
-[@noalloc] external uniform1f : (~location: uniformT, ~value: float) => unit = "TglUniform1f";
+[@noalloc] external uniform1f : (~context: contextT, ~location: uniformT, ~value: float) => unit = "TglUniform1f";
 
 [@noalloc] external uniform1i : (~context: contextT, ~location: uniformT, ~value: int) => unit =
   "TglUniform1i";
@@ -91,8 +123,13 @@ type attributeT;
 
 [@noalloc]
 external uniformMatrix4fv :
-  (~context: contextT, ~location: uniformT, ~transpose: bool, ~value: 'a) => unit =
+  (~context: contextT, ~location: uniformT, ~transpose: bool, ~value: array(float)) => unit =
   "TglUniformMatrix4fv";
+
+[@noalloc]
+external uniformMatrix4fv_glk :
+  (~context: contextT, ~location: uniformT, ~transpose: bool, ~value: 'a) => unit =
+  "TglUniformMatrix4fv_glk";
 
 external createBuffers : (~context: contextT, int) => array(bufferT) = "TglGenBuffers";
 external createBuffer : (~context: contextT) => bufferT = "TglGenBuffer";
@@ -102,7 +139,7 @@ external createBuffer : (~context: contextT) => bufferT = "TglGenBuffer";
 
 [@noalloc]
 external bufferData :
-  (~context: contextT, ~target: int, ~data: Bigarray.t('a, 'b), ~usage: int) => unit =
+  (~context: contextT, ~target: int, ~data: Bigarray.Array1.t('a, 'b, Bigarray.c_layout), ~usage: int) => unit =
   "bufferData";
 
 external getAttribLocation : (~context: contextT, ~program: programT, ~name: string) => attributeT =

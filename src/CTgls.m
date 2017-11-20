@@ -3,6 +3,7 @@
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 #include <caml/callback.h>
+#include <caml/bigarray.h>
 
 #include <Foundation/Foundation.h>
 
@@ -168,37 +169,33 @@ void TglBlendFunc(value context, value sfactor, value dfactor) {
   glBlendFunc(Int_val(sfactor), Int_val(dfactor));
 }
 
-// @Todo Comment both of those functions out because ... big array...
-// Will port later.
-//      Ben - July 11th 2017
-//
-// CAMLprim value TglReadPixels_RGBA(value x, value y, value width, value height) {
-//   CAMLparam4(x, y, width, height);
-//   CAMLlocal1(ret);
+CAMLprim value TglReadPixels_RGBA(value x, value y, value width, value height) {
+  CAMLparam4(x, y, width, height);
+  CAMLlocal1(ret);
 
-//   // Allocate a pointer for caml_ba_alloc's sake.
-//   intnat *size = malloc(sizeof(intnat));
-//   *size = Int_val(width) * Int_val(height) * 4;
+  // Allocate a pointer for caml_ba_alloc's sake.
+  intnat *size = malloc(sizeof(intnat));
+  *size = Int_val(width) * Int_val(height) * 4;
 
-//   char *data = malloc(*size * sizeof(char));
+  char *data = malloc(*size * sizeof(char));
 
-//   glReadPixels(Int_val(x), Int_val(y), Int_val(width), Int_val(height), GL_RGBA, GL_UNSIGNED_BYTE, data);
+  glReadPixels(Int_val(x), Int_val(y), Int_val(width), Int_val(height), GL_RGBA, GL_UNSIGNED_BYTE, data);
 
-//   // return array of size `size` of dimension 1 of uint8 (char).
-//   ret = caml_ba_alloc(CAML_BA_UINT8, 1, data, size);
-//   CAMLreturn(ret);
-// }
+  // return array of size `size` of dimension 1 of uint8 (char).
+  ret = caml_ba_alloc(CAML_BA_UINT8, 1, data, size);
+  CAMLreturn(ret);
+}
 
-// void TglTexImage2D_RGBA_native(value target, value level, value width, value height, value border, value data) {
-//   CAMLparam5(target, level, width, height, border);
-//   CAMLxparam1(data);
-//   glTexImage2D(Int_val(target), Int_val(level), 4, Int_val(width), Int_val(height), Int_val(border), GL_RGBA, GL_UNSIGNED_BYTE, Caml_ba_data_val(data));
-//   CAMLreturn0;
-// }
+void TglTexImage2D_RGBA_native(value target, value level, value width, value height, value border, value data) {
+  CAMLparam5(target, level, width, height, border);
+  CAMLxparam1(data);
+  glTexImage2D(Int_val(target), Int_val(level), 4, Int_val(width), Int_val(height), Int_val(border), GL_RGBA, GL_UNSIGNED_BYTE, Caml_ba_data_val(data));
+  CAMLreturn0;
+}
 
-// void TglTexImage2D_RGBA_bytecode(value * argv, int argn) {
-//   TglTexImage2D_RGBA_native(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
-// }
+void TglTexImage2D_RGBA_bytecode(value * argv, int argn) {
+  TglTexImage2D_RGBA_native(argv[0], argv[1], argv[2], argv[3], argv[4], argv[5]);
+}
 
 void TglUniform1i(value context, value location, value v) {
   glUniform1i(Int_val(location), Int_val(v));
@@ -208,18 +205,8 @@ void TglUniform1f(value context, value location, value v) {
   glUniform1f(Int_val(location), Double_val(v));
 }
 
-// Write our own bigarray wrapper. Below is that version for bufferData. We
-// could maybe just use bigarray but I haven't figured out how to compile it
-// to ios.
-//
-// void TglBufferData(value target, value data, value usage) {
-//   CAMLparam3(target, data, usage);
-//   glBufferData(Int_val(target), caml_ba_byte_size(Caml_ba_array_val(data)), Caml_ba_data_val(data), Int_val(usage));
-//   CAMLreturn0;
-// }
-
 void bufferData(value context, value constant, value data, value usage) {
-  glBufferData(Int_val(constant), Field(data, 0), (GLvoid *)Field(data, 1), Int_val(usage));
+  glBufferData(Int_val(constant), caml_ba_byte_size(Caml_ba_array_val(data)), Caml_ba_data_val(data), Int_val(usage));
 }
 
 void TglViewport(value context, value x, value y, value width, value height) {
@@ -321,8 +308,16 @@ void TglDrawElements(value context, value mode, value first, value typ, value of
 //   glDrawElementsInstanced(Int_val(mode), Int_val(first), Int_val(typ), (const GLvoid *)o, Int_val(primcount));
 // }
 
-void TglUniformMatrix4fv(value context, value location, value transpose, value val) {
+void TglUniformMatrix4fv_glk(value context, value location, value transpose, value val) {
   glUniformMatrix4fv(Int_val(location), 1, Bool_val(transpose), ((GLKMatrix4 *)Field(val, 0))->m);
+}
+
+void TglUniformMatrix4fv(value context, value location, value transpose, value val) {
+  float matrix[16];
+  for (int i = 0; i < 16; ++i){
+    matrix[i] = Double_field(val, i);
+  }
+  glUniformMatrix4fv(Int_val(location), 1, Bool_val(transpose), matrix);
 }
 
 /* =========================================================== */

@@ -1,10 +1,4 @@
-open GLConstants;
-open Bindings;
-open Tgls;
-
-let module Utils = Reprocessing_lite_Utils;
-let module Draw = Reprocessing_lite_Draw;
-let module Env = Reprocessing_lite.Env;
+open Reprocessing;
 
 /* https://www.youtube.com/watch?v=KkyIDI6rQJI
    Purple rain processing demo */
@@ -14,7 +8,7 @@ type dropT = {
   z: int,
   len: int,
   yspeed: int,
-  color: Reprocessing_lite.colorT,
+  color: colorT,
   time: int
 };
 
@@ -28,8 +22,8 @@ let make = (w, (ymin, ymax), time) => {
     yspeed: Utils.remap(~value=z, ~low1=0, ~high1=20, ~low2=5, ~high2=15),
     color:
       Utils.lerpColor(
-        ~low=Utils.white,
-        ~high=Utils.color(~r=0, ~g=43, ~b=226),
+        ~low=Utils.color(~r=255, ~g=255, ~b=255, ~a=255),
+        ~high=Utils.color(~r=0, ~g=43, ~b=226, ~a=255),
         ~value=Utils.randomf(~min=0.3, ~max=1.)
       ),
     time
@@ -43,12 +37,13 @@ type state = {
 };
 
 let setup = (env) => {
+  Env.size(~width=375, ~height=667, env);
   let lst = Array.init(500, (_) => make(Env.width(env), ((-500), (-50)), 0));
   {lst, time: 0, running: true}
 };
 
 let draw = ({lst, running, time}, env) => {
-  Draw.background(Utils.color(~r=230, ~g=230, ~b=250), env);
+  Draw.background(Utils.color(~r=230, ~g=230, ~b=250, ~a=255), env);
   /*Draw.fill (Utils.color r::100 g::0 b::0) env;*/
   Utils.randomSeed(time);
   let lst =
@@ -89,4 +84,4 @@ let draw = ({lst, running, time}, env) => {
   };*/
 /*run ::setup ::draw ::mouseDown ::mouseUp ::mouseDragged ();*/
 
-Reprocessing_lite.run(~setup, ~draw, ());
+run(~setup, ~draw, ());

@@ -23,9 +23,9 @@ let drawArc =
   /*print_endline @@ "r " ^ (string_of_float r) ^ "g " ^ (string_of_float g) ^ "b " ^ string_of_float b;*/
   let verticesData = env.batch.vertexArray;
   let elementData = env.batch.elementArray;
-  let setFloat32 = Bigarray.setFloat32;
-  let setUint16 = Bigarray.setUint16;
-  let getUint16 = Bigarray.getUint16;
+  let setFloat32 = Bigarray.Array1.set;
+  let setUint16 = Bigarray.Array1.set;
+  let getUint16 = Bigarray.Array1.set;
   let vertexArrayOffset = env.batch.vertexPtr;
   let elementArrayOffset = env.batch.elementPtr;
   let start_i =
@@ -71,7 +71,7 @@ let drawArc =
          `elementArrayOffset` */
       let jj = (i - start_i - 3) * 3 + elementArrayOffset + 3;
       setUint16(elementData, jj, vertexArrayOffset / vertexSize);
-      setUint16(elementData, jj + 1, getUint16(elementData, jj - 1));
+      setUint16(elementData, jj + 1, Bigarray.Array1.get(elementData, jj - 1));
       setUint16(elementData, jj + 2, ii / vertexSize)
     }
   };
@@ -82,7 +82,7 @@ let drawArc =
 let fill = (color, env: glEnv) => env.style = {...env.style, fillColor: Some(color)};
 
 let background = (color, env: glEnv) => {
-  clear(~context=env.gl, 16384 lor 256);
+  clear(~context=env.gl, ~mask=16384 lor 256);
   let w = float_of_int(Env.width(env));
   let h = float_of_int(Env.height(env));
   addRectToGlobalBatch(

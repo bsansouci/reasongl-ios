@@ -88,17 +88,16 @@ CURDIR = $(shell pwd)
 OCAMLDIR = $(CURDIR)/bin/ocaml-iPhoneSimulator-64/release
 OCAMLBIN = $(CURDIR)/bin/ocaml-host-64/release
 CC = $(TOOLDIR)/clang -arch x86_64
-CFLAGS = -isysroot $(PLT)$(SDK) -isystem $(OCAMLDIR)/lib/ocaml -DCAML_NAME_SPACE -I$(CURDIR)/OCamlTest/OCamlTest -I$(OCAMLDIR)/lib/ocaml -fno-objc-arc -miphoneos-version-min=$(IOSMINREV)
+CFLAGS = -isysroot $(PLT)$(SDK) -isystem $(OCAMLDIR)/lib/ocaml -DCAML_NAME_SPACE -I$(CURDIR)/OCamlTest/OCamlTest -I$(OCAMLDIR)/lib/ocaml -I$(OCAMLDIR)/../stdlib/ -fno-objc-arc -miphoneos-version-min=$(IOSMINREV)
 OCAMLOPT = $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -I $(CURDIR) -ccopt -isysroot -ccopt $(PLT)$(SDK)
 # MFLAGS = -fobjc-legacy-dispatch -fobjc-abi-version=2
-MLFLAGS = -c -I Build/src -I Build/reasongl-interface/src
+MLFLAGS = -c -I Build/src -I Build/reasongl-interface/src -I Build/reprocessing/src -I $(OCAMLDIR)/lib/ocaml bigarray.cmxa
 
-C_FILES = CTgls CBindings CBigarray
+C_FILES = CTgls CBindings bigarray_stubs mmap_unix
 REASONGL_INTERFACE_FILES = RGLConstants RGLEvents RGLInterface ReasonglInterface
-REASONGL_FILES = Bigarray GLConstants Bindings Tgls Reasongl
+REASONGL_FILES = GLConstants Bindings Tgls Reasongl
 # this was produced by running 'ocamldep -pp 'refmt --print=binary' -one-line -ml-synonym .re -mli-synonym .rei  *.re *.rei -modules -sort' in the reprocessing/src directory
-# TODO: make reasongl comply to ReasonglInterface, so that Reprocessing works!
-REPROCESSING_FILES = # Reprocessing_Common Reprocessing_Utils Reprocessing_Types Reprocessing_Internal Reprocessing_Hotreload Reprocessing_Events Reprocessing_Env Reprocessing_Draw Reprocessing_Constants Reprocessing_ClientWrapper Reprocessing
+REPROCESSING_FILES = Reprocessing_Events Reprocessing_Common Reprocessing_Constants Reprocessing_Matrix Reprocessing_Shaders Reprocessing_Internal Reprocessing_Font Reprocessing_Types Reprocessing_Utils Reprocessing_Hotreload Reprocessing_Env Reprocessing_Draw Reprocessing_ClientWrapper Reprocessing
 REPROCESSING_LITE_FILES = Reprocessing_lite Reprocessing_lite_Utils Reprocessing_lite_Draw
 APP_FILES= ${REPROCESSING_LITE_FILES} PurpleRain
 
@@ -132,7 +131,7 @@ deploy-simulator:
 	xcrun simctl launch --console booted $(BUNDLE_ID)
 
 TestReason: Build $(C_FILES_PATH) $(RE_FILES_PATH)
-		$(OCAMLOPT) $(C_FILES_PATH) $(RE_FILES_PATH) -output-obj -o Build/re_output.o
+		$(OCAMLOPT) bigarray.cmxa $(C_FILES_PATH) $(RE_FILES_PATH) -output-obj -o Build/re_output.o
 		cp $(OCAMLDIR)/lib/ocaml/libasmrun.a Build/libGobi.a
 		ar -r Build/libGobi.a $(C_FILES_PATH) Build/re_output.o
 
@@ -152,7 +151,16 @@ Build:
 
 clean::
 		rm -f TestApp *.o *.cm[iox]
-		rm -rf Build/src/* Build/Products Build/libGobi.a Build/reasongl-interface/src/*
+		rm -rf Build/src/* Build/Products Build/libGobi.a Build/reasongl-interface/src/* Build/reprocessing/src/*
+
+Build/src/bigarray_stubs.o: src/bigarray_stubs.c
+		cp $< Build/$<
+		$(CC) $(CFLAGS) $(MFLAGS) -c -o $@ Build/$<
+
+Build/src/mmap_unix.o: src/mmap_unix.c
+		cp $< Build/$<
+		$(CC) $(CFLAGS) $(MFLAGS) -c -o $@ Build/$<
+
 
 Build/%.o: %.m
 		cp $< Build/$<

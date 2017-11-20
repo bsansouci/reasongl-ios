@@ -7,10 +7,11 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		432D76951FBC192600118CEC /* libGobi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 432D76941FBC192600118CEC /* libGobi.a */; };
 		43C88D2F1E3B340C002BA291 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D2D1E3B340C002BA291 /* Shader.fsh */; };
 		43C88D301E3B340C002BA291 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D2E1E3B340C002BA291 /* Shader.vsh */; };
 		43C88D321E3B349A002BA291 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D311E3B349A002BA291 /* Main.storyboard */; };
+		7F81026F1FC1015200D2CC05 /* bigarray.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 43C88D331E3F0DBB002BA291 /* bigarray.a */; };
+		7F8102711FC101F200D2CC05 /* libGobi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F8102701FC101F200D2CC05 /* libGobi.a */; };
 		C99F606A1E34FE8F0064B563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F60691E34FE8F0064B563 /* main.m */; };
 		C99F606D1E34FE8F0064B563 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F606C1E34FE8F0064B563 /* AppDelegate.m */; };
 		C99F60701E34FE8F0064B563 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F606F1E34FE8F0064B563 /* ViewController.m */; };
@@ -30,12 +31,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		278727F11E3805CF004B754D /* libGobi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libGobi.a; path = ../_build/libGobi.a; sourceTree = "<group>"; };
-		432D76941FBC192600118CEC /* libGobi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libGobi.a; path = ../libGobi.a; sourceTree = "<group>"; };
 		43C88D2D1E3B340C002BA291 /* Shader.fsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.fsh; sourceTree = "<group>"; };
 		43C88D2E1E3B340C002BA291 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
 		43C88D311E3B349A002BA291 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		43C88D331E3F0DBB002BA291 /* bigarray.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = bigarray.a; path = "../bin/ocaml-iPhoneSimulator-64/release/lib/ocaml/bigarray.a"; sourceTree = "<group>"; };
+		7F8102701FC101F200D2CC05 /* libGobi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libGobi.a; path = ../Build/libGobi.a; sourceTree = "<group>"; };
 		C99F60651E34FE8F0064B563 /* OCamlTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCamlTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99F60691E34FE8F0064B563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		C99F606B1E34FE8F0064B563 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -55,7 +55,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				432D76951FBC192600118CEC /* libGobi.a in Frameworks */,
+				7F81026F1FC1015200D2CC05 /* bigarray.a in Frameworks */,
+				7F8102711FC101F200D2CC05 /* libGobi.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -72,9 +73,8 @@
 		278727F01E3805CF004B754D /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				432D76941FBC192600118CEC /* libGobi.a */,
 				43C88D331E3F0DBB002BA291 /* bigarray.a */,
-				278727F11E3805CF004B754D /* libGobi.a */,
+				7F8102701FC101F200D2CC05 /* libGobi.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
