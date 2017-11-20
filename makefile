@@ -91,13 +91,24 @@ CC = $(TOOLDIR)/clang -arch x86_64
 CFLAGS = -isysroot $(PLT)$(SDK) -isystem $(OCAMLDIR)/lib/ocaml -DCAML_NAME_SPACE -I$(CURDIR)/OCamlTest/OCamlTest -I$(OCAMLDIR)/lib/ocaml -fno-objc-arc -miphoneos-version-min=$(IOSMINREV)
 OCAMLOPT = $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -I $(CURDIR) -ccopt -isysroot -ccopt $(PLT)$(SDK)
 # MFLAGS = -fobjc-legacy-dispatch -fobjc-abi-version=2
-MLFLAGS = -c -I Build
+MLFLAGS = -c -I Build/src -I Build/reasongl-interface/src
 
 C_FILES = CTgls CBindings CBigarray
-RE_FILES = Bigarray RGLConstants GLConstants Bindings Tgls Reasongl Reasongl_Utils Reasongl_Draw PurpleRain
+REASONGL_INTERFACE_FILES = RGLConstants RGLEvents RGLInterface ReasonglInterface
+REASONGL_FILES = Bigarray GLConstants Bindings Tgls Reasongl
+# this was produced by running 'ocamldep -pp 'refmt --print=binary' -one-line -ml-synonym .re -mli-synonym .rei  *.re *.rei -modules -sort' in the reprocessing/src directory
+# TODO: make reasongl comply to ReasonglInterface, so that Reprocessing works!
+REPROCESSING_FILES = # Reprocessing_Common Reprocessing_Utils Reprocessing_Types Reprocessing_Internal Reprocessing_Hotreload Reprocessing_Events Reprocessing_Env Reprocessing_Draw Reprocessing_Constants Reprocessing_ClientWrapper Reprocessing
+REPROCESSING_LITE_FILES = Reprocessing_lite Reprocessing_lite_Utils Reprocessing_lite_Draw
+APP_FILES= ${REPROCESSING_LITE_FILES} PurpleRain
 
-C_FILES_PATH=$(addprefix Build/, $(addsuffix .o, $(C_FILES)))
-RE_FILES_PATH=$(addprefix Build/, $(addsuffix .cmx, $(RE_FILES)))
+C_FILES_PATH=$(addprefix Build/src/, $(addsuffix .o, $(C_FILES)))
+RE_FILES_PATH=\
+	$(addprefix Build/reasongl-interface/src/, $(addsuffix .cmx, $(REASONGL_INTERFACE_FILES))) \
+	$(addprefix Build/src/, $(addsuffix .cmx, $(REASONGL_FILES))) \
+	$(addprefix Build/reprocessing/src/, $(addsuffix .cmx, $(REPROCESSING_FILES))) \
+	$(addprefix Build/src/, $(addsuffix .cmx, $(APP_FILES)))
+
 
 app:: TestApp
 
@@ -137,25 +148,25 @@ TestApp: TestReason
 			CONFIGURATION_BUILD_DIR=$(BUILD_DIR)
 
 Build:
-	mkdir -p Build/src
+	mkdir -p Build/src Build/reasongl-interface/src Build/reprocessing/src
 
 clean::
 		rm -f TestApp *.o *.cm[iox]
-		rm -rf Build/src/* Build/Products Build/libGobi.a
+		rm -rf Build/src/* Build/Products Build/libGobi.a Build/reasongl-interface/src/*
 
-Build/%.o: src/%.m
+Build/%.o: %.m
 		cp $< Build/$<
 		$(CC) $(CFLAGS) $(MFLAGS) -c -o $@ Build/$<
 
-Build/%.cmi: src/%.rei
+Build/%.cmi: %.rei
 		cp $< Build/$<
 		$(OCAMLOPT) $(MLFLAGS) -o $@ -impl Build/$<
 
-Build/%.cmo: src/%.re
+Build/%.cmo: %.re
 		cp $< Build/$<
 		$(OCAMLOPT) $(MLFLAGS) -o $@ -impl Build/$<
 
-Build/%.cmx: src/%.re
+Build/%.cmx: %.re
 		cp $< Build/$<
 		$(OCAMLOPT) $(MLFLAGS) -o $@ -impl Build/$<
 

@@ -1,0 +1,6 @@
+[submodule "reprocessing"]
+	path = reprocessing
+	url = git@github.com:jaredly/reprocessing
+[submodule "reasongl-interface"]
+	path = reasongl-interface
+	url = git@github.com:jaredly/reasongl-interface

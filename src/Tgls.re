@@ -1,4 +1,4 @@
-type contextT = Bindings.contextT;
+open Bindings;
 
 type textureT;
 
@@ -7,7 +7,7 @@ external genTextures : (~context: contextT, int) => array(textureT) = "TglGenTex
 
 external genTexture : (~context: contextT) => textureT = "TglGenTexture";
 
-[@noalloc] external blendFunc : (~context: contextT, ~sfactor: int, ~dfactor: int) => unit =
+[@noalloc] external blendFunc : (~context: contextT, int, int) => unit =
   "TglBlendFunc";
 
 
@@ -34,19 +34,19 @@ external viewport : (~context: contextT, ~x: int, ~y: int, ~width: int, ~height:
 /* external clearColor : context::contextT => r::float => g::float => b::float => a::float => unit = "clearColor"; */
 external createProgram : (~context: contextT) => programT = "TglCreateProgram";
 
-external createShader : (~context: contextT, ~shaderType: int) => shaderT = "TglCreateShader";
+external createShader : (~context: contextT, int) => shaderT = "TglCreateShader";
 
 external attachShader : (~context: contextT, ~program: programT, ~shader: shaderT) => unit =
   "TglAttachShader";
 
-external deleteShader : (~context: contextT, ~shader: shaderT) => unit = "TglDeleteShader";
+external deleteShader : (~context: contextT, shaderT) => unit = "TglDeleteShader";
 
 external shaderSource : (~context: contextT, ~shader: shaderT, ~source: array(string)) => unit =
   "TglShaderSource";
 
-external compileShader : (~context: contextT, ~shader: shaderT) => unit = "TglCompileShader";
+external compileShader : (~context: contextT, shaderT) => unit = "TglCompileShader";
 
-external linkProgram : (~context: contextT, ~program: programT) => unit = "TglLinkProgram";
+external linkProgram : (~context: contextT, programT) => unit = "TglLinkProgram";
 
 external useProgram : (~context: contextT, programT) => unit = "TglUseProgram";
 
@@ -94,7 +94,8 @@ external uniformMatrix4fv :
   (~context: contextT, ~location: uniformT, ~transpose: bool, ~value: 'a) => unit =
   "TglUniformMatrix4fv";
 
-external createBuffer : (~context: contextT, int) => array(bufferT) = "TglGenBuffers";
+external createBuffers : (~context: contextT, int) => array(bufferT) = "TglGenBuffers";
+external createBuffer : (~context: contextT) => bufferT = "TglGenBuffer";
 
 [@noalloc] external bindBuffer : (~context: contextT, ~target: int, ~buffer: bufferT) => unit =
   "TglBindBuffer";
@@ -131,7 +132,7 @@ external vertexAttribPointer :
 /*external setVertexBuffer : gameViewControllerT => bufferT => unit = "setVertexBuffer";*/
 [@noalloc]
 external clearColor :
-  (~context: contextT, ~red: float, ~green: float, ~blue: float, ~alpha: float) => unit =
+  (~context: contextT, ~r: float, ~g: float, ~b: float, ~a: float) => unit =
   "TglClearColor";
 
 /*external glGenTextures : context::contextT => count::int => array textureT = "TglGenTextures";*/

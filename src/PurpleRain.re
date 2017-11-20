@@ -2,9 +2,9 @@ open GLConstants;
 open Bindings;
 open Tgls;
 
-let module Utils = Reasongl_Utils;
-let module Draw = Reasongl_Draw;
-let module Env = Reasongl.Env;
+let module Utils = Reprocessing_lite_Utils;
+let module Draw = Reprocessing_lite_Draw;
+let module Env = Reprocessing_lite.Env;
 
 /* https://www.youtube.com/watch?v=KkyIDI6rQJI
    Purple rain processing demo */
@@ -14,7 +14,7 @@ type dropT = {
   z: int,
   len: int,
   yspeed: int,
-  color: Reasongl.colorT,
+  color: Reprocessing_lite.colorT,
   time: int
 };
 
@@ -89,4 +89,4 @@ let draw = ({lst, running, time}, env) => {
   };*/
 /*run ::setup ::draw ::mouseDown ::mouseUp ::mouseDragged ();*/
 
-Reasongl.run(~setup, ~draw, ());
+Reprocessing_lite.run(~setup, ~draw, ());
