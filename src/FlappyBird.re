@@ -73,7 +73,10 @@ let drawBird = (state, env) => {
   Draw.pushMatrix(env);
   Draw.translate(~x=birdX, ~y=state.birdY -. 2., env);
   let low1 = (-200.);
-  Draw.rotate(Utils.remapf(~value=state.birdVY, ~low1, ~high1=1200., ~low2=(-0.5), ~high2=1.5), env);
+  Draw.rotate(
+    Utils.remapf(~value=state.birdVY, ~low1, ~high1=1200., ~low2=(-0.5), ~high2=1.5),
+    env
+  );
   Draw.translate(~x=birdSize *. (-1.), ~y=birdSize *. (-1.), env);
   switch (int_of_float(state.xOffset /. 20.) mod 3) {
   | 0 =>
@@ -167,8 +170,11 @@ let drawTiledThing = ({image}, ~texPos, ~texWidth, ~texHeight, ~xOffset, ~y, ~he
 };
 
 let draw = ({font, score, image, birdY, birdVY, pipes, xOffset, running} as state, env) => {
-  let userInput = Env.keyPressed(Space, env);
-  let userInput = Env.mousePressed(env);
+  let userInput =
+    switch Reasongl.Gl.target {
+    | "native-ios" => Env.mousePressed(env)
+    | _ => Env.keyPressed(Space, env)
+    };
   drawTiledThing(
     state,
     ~texPos=(146, 0),
