@@ -58,15 +58,18 @@ OCAMLBIN = $(CURDIR)/bin/ocaml-host-64/release
 
 
 
+# NOTE: Currently, if you want to build for device, you'll need to have opam installed
+# and set up gobi (https://github.com/saschatimme/gobi - follow the Readme through
+# gobi_setup).
+# TODO(jared): Get our iphoneos stuff building an ios-sysroot, so we don't depend on gobi
 
 # Uncomment this section to build to device
-# SIMULATOR_OR_IOS_SDK=iphoneos
-# ARCH=arm64
-# PLT = $(HIDEOUT)/Platforms/iPhoneOS.platform
-# SDK = /Developer/SDKs/iPhoneOS.sdk
-# TODO(jared): Get our iphoneos stuff building an ios-sysroot, so we don't depend on gobi
-# OCAMLDIR = ~/.opam/4.04.0+ios+arm64/ios-sysroot
-# OCAMLBIN = ~/.opam/4.04.0+ios+arm64/ios-sysroot
+SIMULATOR_OR_IOS_SDK=iphoneos
+ARCH=arm64
+PLT = $(HIDEOUT)/Platforms/iPhoneOS.platform
+SDK = /Developer/SDKs/iPhoneOS.sdk
+OCAMLDIR = ~/.opam/4.04.0+ios+arm64/ios-sysroot
+OCAMLBIN = ~/.opam/4.04.0+ios+arm64/ios-sysroot
 
 
 
