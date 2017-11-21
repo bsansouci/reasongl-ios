@@ -226,6 +226,35 @@ static value Val_some(value v) {
   CAMLreturn(some);
 }
 
+CAMLprim value pathForResource(value filename, value ext) {
+  CAMLparam2(filename, ext);
+  NSString* path = [[NSBundle mainBundle] pathForResource:[NSString stringWithUTF8String:String_val(filename)]
+                                                   ofType:[NSString stringWithUTF8String:String_val(ext)]];
+  if (!path) {
+    return Val_none;
+  }
+  CAMLreturn(Val_some(caml_copy_string([path UTF8String])));
+};
+
+CAMLprim value loadFile(value filename) {
+  CAMLparam1(filename);
+  NSString* name = [NSString stringWithUTF8String:String_val(filename)];
+  if (!name) {
+    return Val_none;
+  }
+  NSString* path = [[NSBundle mainBundle] pathForResource:name ofType:@""];
+  if (!path) {
+    return Val_none;
+  }
+  NSString* content = [NSString stringWithContentsOfFile:path
+                                              encoding:NSUTF8StringEncoding
+                                                 error:NULL];
+  if (!content) {
+    return Val_none;
+  }
+  CAMLreturn(Val_some(caml_copy_string([content UTF8String])));
+}
+
 CAMLprim value loadImage(value filename) {
   CAMLparam1(filename);
   CAMLlocal2(record_image_data, dataArr);
