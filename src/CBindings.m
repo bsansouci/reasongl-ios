@@ -226,16 +226,6 @@ static value Val_some(value v) {
   CAMLreturn(some);
 }
 
-CAMLprim value pathForResource(value filename, value ext) {
-  CAMLparam2(filename, ext);
-  NSString* path = [[NSBundle mainBundle] pathForResource:[NSString stringWithUTF8String:String_val(filename)]
-                                                   ofType:[NSString stringWithUTF8String:String_val(ext)]];
-  if (!path) {
-    return Val_none;
-  }
-  CAMLreturn(Val_some(caml_copy_string([path UTF8String])));
-};
-
 CAMLprim value loadFile(value filename) {
   CAMLparam1(filename);
   NSString* name = [NSString stringWithUTF8String:String_val(filename)];
