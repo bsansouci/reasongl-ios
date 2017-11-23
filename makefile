@@ -99,7 +99,7 @@ REASONGL_FILES = GLConstants Bindings Tgls Reasongl
 # this was produced by running 'ocamldep -pp 'refmt --print=binary' -one-line -ml-synonym .re -mli-synonym .rei  *.re *.rei -modules -sort' in the reprocessing/src directory
 REPROCESSING_FILES = Reprocessing_Events Reprocessing_Common Reprocessing_Constants Reprocessing_Matrix Reprocessing_Shaders Reprocessing_Internal Reprocessing_Font Reprocessing_Types Reprocessing_Utils Reprocessing_Hotreload Reprocessing_Env Reprocessing_Draw Reprocessing_ClientWrapper Reprocessing
 REPROCESSING_LITE_FILES = Reprocessing_lite Reprocessing_lite_Utils Reprocessing_lite_Draw
-APP_FILES= ${REPROCESSING_LITE_FILES} PurpleRain
+APP_FILES= ${REPROCESSING_LITE_FILES} FlappyBird
 
 C_FILES_PATH=$(addprefix Build/src/, $(addsuffix .o, $(C_FILES)))
 RE_FILES_PATH=\

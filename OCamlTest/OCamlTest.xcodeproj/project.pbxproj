@@ -10,6 +10,11 @@
 		43C88D2F1E3B340C002BA291 /* Shader.fsh in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D2D1E3B340C002BA291 /* Shader.fsh */; };
 		43C88D301E3B340C002BA291 /* Shader.vsh in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D2E1E3B340C002BA291 /* Shader.vsh */; };
 		43C88D321E3B349A002BA291 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 43C88D311E3B349A002BA291 /* Main.storyboard */; };
+		7F0CA8171FC3D82A00AB7F3D /* font.fnt in Resources */ = {isa = PBXBuildFile; fileRef = 7F0CA8131FC3D82A00AB7F3D /* font.fnt */; };
+		7F0CA8181FC3D82A00AB7F3D /* flappy.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F0CA8141FC3D82A00AB7F3D /* flappy.png */; };
+		7F0CA8191FC3D82A00AB7F3D /* flappy.fnt in Resources */ = {isa = PBXBuildFile; fileRef = 7F0CA8151FC3D82A00AB7F3D /* flappy.fnt */; };
+		7F0CA81A1FC3D82A00AB7F3D /* font.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F0CA8161FC3D82A00AB7F3D /* font.png */; };
+		7F0CA81C1FC3E2C100AB7F3D /* reason-logo.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F0CA81B1FC3E2C000AB7F3D /* reason-logo.png */; };
 		7F3824CF1FC13D5800CB54CC /* flappy-base.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F3824CE1FC13D5800CB54CC /* flappy-base.png */; };
 		7F3824D11FC1462200CB54CC /* background.png in Resources */ = {isa = PBXBuildFile; fileRef = 7F3824D01FC1462200CB54CC /* background.png */; };
 		7F81026F1FC1015200D2CC05 /* bigarray.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 43C88D331E3F0DBB002BA291 /* bigarray.a */; };
@@ -37,6 +42,11 @@
 		43C88D2E1E3B340C002BA291 /* Shader.vsh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.glsl; path = Shader.vsh; sourceTree = "<group>"; };
 		43C88D311E3B349A002BA291 /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		43C88D331E3F0DBB002BA291 /* bigarray.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = bigarray.a; path = "../bin/ocaml-iPhoneSimulator-64/release/lib/ocaml/bigarray.a"; sourceTree = "<group>"; };
+		7F0CA8131FC3D82A00AB7F3D /* font.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = font.fnt; path = ../../assets/font.fnt; sourceTree = "<group>"; };
+		7F0CA8141FC3D82A00AB7F3D /* flappy.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = flappy.png; path = ../../assets/flappy.png; sourceTree = "<group>"; };
+		7F0CA8151FC3D82A00AB7F3D /* flappy.fnt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = flappy.fnt; path = ../../assets/flappy.fnt; sourceTree = "<group>"; };
+		7F0CA8161FC3D82A00AB7F3D /* font.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = font.png; path = ../../assets/font.png; sourceTree = "<group>"; };
+		7F0CA81B1FC3E2C000AB7F3D /* reason-logo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "reason-logo.png"; path = "../../assets/reason-logo.png"; sourceTree = "<group>"; };
 		7F3824CE1FC13D5800CB54CC /* flappy-base.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "flappy-base.png"; path = "../flappy-base.png"; sourceTree = "<group>"; };
 		7F3824D01FC1462200CB54CC /* background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = background.png; sourceTree = "<group>"; };
 		7F8102701FC101F200D2CC05 /* libGobi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libGobi.a; path = ../Build/libGobi.a; sourceTree = "<group>"; };
@@ -105,6 +115,11 @@
 		C99F60671E34FE8F0064B563 /* OCamlTest */ = {
 			isa = PBXGroup;
 			children = (
+				7F0CA81B1FC3E2C000AB7F3D /* reason-logo.png */,
+				7F0CA8151FC3D82A00AB7F3D /* flappy.fnt */,
+				7F0CA8141FC3D82A00AB7F3D /* flappy.png */,
+				7F0CA8131FC3D82A00AB7F3D /* font.fnt */,
+				7F0CA8161FC3D82A00AB7F3D /* font.png */,
 				C99F606B1E34FE8F0064B563 /* AppDelegate.h */,
 				C99F606C1E34FE8F0064B563 /* AppDelegate.m */,
 				43C88D2D1E3B340C002BA291 /* Shader.fsh */,
@@ -227,8 +242,13 @@
 				43C88D2F1E3B340C002BA291 /* Shader.fsh in Resources */,
 				7F3824D11FC1462200CB54CC /* background.png in Resources */,
 				C99F60781E34FE8F0064B563 /* LaunchScreen.storyboard in Resources */,
+				7F0CA81C1FC3E2C100AB7F3D /* reason-logo.png in Resources */,
+				7F0CA8191FC3D82A00AB7F3D /* flappy.fnt in Resources */,
 				C99F60751E34FE8F0064B563 /* Assets.xcassets in Resources */,
+				7F0CA8181FC3D82A00AB7F3D /* flappy.png in Resources */,
+				7F0CA8171FC3D82A00AB7F3D /* font.fnt in Resources */,
 				43C88D321E3B349A002BA291 /* Main.storyboard in Resources */,
+				7F0CA81A1FC3D82A00AB7F3D /* font.png in Resources */,
 				43C88D301E3B340C002BA291 /* Shader.vsh in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

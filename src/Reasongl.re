@@ -10,7 +10,10 @@ let module Gl
   module File: FileT = {
     type t;
     let readFile = (~filename, ~cb) => {
-      failwith("readFile not implemented");
+      switch (loadFile(filename)) {
+      | None => failwith("File not found in resources: " ++ filename)
+      | Some(text) => cb(text)
+      }
     };
   };
 
@@ -71,7 +74,7 @@ let module Gl
   };
 
   let render = (~window, ~mouseDown=?, ~mouseUp=?, ~mouseMove=?, ~keyDown=?, ~keyUp=?, ~windowResize=?, ~displayFunc, ()) => {
-    Callback.register("reasonglUpdate", displayFunc);
+    Callback.register("reasonglUpdate", (time) => displayFunc(time *. 1000.));
     Callback.register("reasonglTouchDrag", switch mouseMove {
     | None => (x, y) => ()
     | Some(fn) => (x, y) => ignore(fn(~x=int_of_float(x), ~y=int_of_float(y)))
