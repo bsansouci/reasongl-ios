@@ -3,7 +3,7 @@
 # Should I change compiler version?
 # Are there any tests
 
-# There are multiple copies created because building ocaml leaves build artifacts 
+# There are multiple copies created because building ocaml leaves build artifacts
 # They are inside various folders and I didn't find a way to clean them (although I didn't look to hard)
 CURDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
@@ -48,7 +48,7 @@ export MIN_IOS_VERSION=9.3
 # 	ARCHS=( "${!ARCHS}" )
 # 	export HOST_BIN=$(pwd)/bin/ocaml-host-${BITS}/release/bin
 # 	echo ${HOST_BIN}
-# 	for i in 0 1 
+# 	for i in 0 1
 # 	do
 # 		export PLATFORM=${PLATFORMS[i]}
 # 		export ARCH=${ARCHS[i]}
@@ -74,3 +74,10 @@ cd ${COMPILER_DIR}
 export PREFIX=$(pwd)
 make world opt install || exit $?
 cd ../..
+
+# Grab the pre-built ocaml that can target devices (arm64)
+cd bin
+curl -L -O https://github.com/bsansouci/reasongl-ios/releases/download/v0.1/4.04.0.ios.arm64.tgz
+tar xf 4.04.0.ios.arm64.tgz
+rm 4.04.0.ios.arm64.tgz
+cd ..

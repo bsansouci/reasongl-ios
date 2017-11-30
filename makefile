@@ -55,6 +55,7 @@ PLT = $(HIDEOUT)/Platforms/iPhoneSimulator.platform
 SDK = /Developer/SDKs/iPhoneSimulator.sdk
 OCAMLDIR = $(CURDIR)/bin/ocaml-iPhoneSimulator-64/release
 OCAMLBIN = $(CURDIR)/bin/ocaml-host-64/release
+EXTRA_CFLAGS = -I$(OCAMLDIR)/../stdlib
 
 
 
@@ -64,12 +65,13 @@ OCAMLBIN = $(CURDIR)/bin/ocaml-host-64/release
 # TODO(jared): Get our iphoneos stuff building an ios-sysroot, so we don't depend on gobi
 
 # Uncomment this section to build to device
-SIMULATOR_OR_IOS_SDK=iphoneos
-ARCH=arm64
-PLT = $(HIDEOUT)/Platforms/iPhoneOS.platform
-SDK = /Developer/SDKs/iPhoneOS.sdk
-OCAMLDIR = ~/.opam/4.04.0+ios+arm64/ios-sysroot
-OCAMLBIN = ~/.opam/4.04.0+ios+arm64/ios-sysroot
+# SIMULATOR_OR_IOS_SDK=iphoneos
+# ARCH=arm64
+# PLT = $(HIDEOUT)/Platforms/iPhoneOS.platform
+# SDK = /Developer/SDKs/iPhoneOS.sdk
+# OCAMLDIR = $(CURDIR)/bin/4.04.0+ios+arm64
+# OCAMLBIN = $(CURDIR)/bin/4.04.0+ios+arm64
+# EXTRA_CFLAGS =
 
 
 
@@ -108,7 +110,7 @@ TOOLDIR = $(HIDEOUT)/Toolchains/XcodeDefault.xctoolchain/usr/bin
 
 
 CC = $(TOOLDIR)/clang -arch $(ARCH)
-CFLAGS = -isysroot $(PLT)$(SDK) -isystem $(OCAMLDIR)/lib/ocaml -DCAML_NAME_SPACE -I$(CURDIR)/OCamlTest/OCamlTest -I$(OCAMLDIR)/lib/ocaml/caml -I$(OCAMLDIR)/lib/ocaml -I$(OCAMLDIR)/../stdlib/ -fno-objc-arc -miphoneos-version-min=$(IOSMINREV)
+CFLAGS = -isysroot $(PLT)$(SDK) -isystem $(OCAMLDIR)/lib/ocaml -DCAML_NAME_SPACE -I$(CURDIR)/OCamlTest/OCamlTest -I$(OCAMLDIR)/lib/ocaml/caml -I$(OCAMLDIR)/lib/ocaml -fno-objc-arc -miphoneos-version-min=$(IOSMINREV) $(EXTRA_CFLAGS)
 OCAMLOPT = $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -I $(CURDIR) -no-alias-deps -ccopt -isysroot -ccopt $(PLT)$(SDK)
 MLFLAGS = -c -I Build/src -I Build/reasongl-interface/src -I Build/reprocessing/src -I $(OCAMLDIR)/lib/ocaml bigarray.cmxa
 
