@@ -21,6 +21,7 @@
 		7F6461B61FC1622F0075214E /* re_output.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F6461B51FC1622E0075214E /* re_output.o */; };
 		7F81026F1FC1015200D2CC05 /* bigarray.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 43C88D331E3F0DBB002BA291 /* bigarray.a */; };
 		7F8102711FC101F200D2CC05 /* libGobi.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 7F8102701FC101F200D2CC05 /* libGobi.a */; };
+		7F9E37381FD33F3D00E18358 /* assets in Resources */ = {isa = PBXBuildFile; fileRef = 7F9E37371FD33F3D00E18358 /* assets */; };
 		C99F606A1E34FE8F0064B563 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F60691E34FE8F0064B563 /* main.m */; };
 		C99F606D1E34FE8F0064B563 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F606C1E34FE8F0064B563 /* AppDelegate.m */; };
 		C99F60701E34FE8F0064B563 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = C99F606F1E34FE8F0064B563 /* ViewController.m */; };
@@ -54,6 +55,7 @@
 		7F6461B31FC161440075214E /* bigarray.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = bigarray.a; path = "../bin/ocaml-iPhoneOS-64/release/lib/ocaml/bigarray.a"; sourceTree = "<group>"; };
 		7F6461B51FC1622E0075214E /* re_output.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = re_output.o; path = ../Build/re_output.o; sourceTree = "<group>"; };
 		7F8102701FC101F200D2CC05 /* libGobi.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libGobi.a; path = ../Build/libGobi.a; sourceTree = "<group>"; };
+		7F9E37371FD33F3D00E18358 /* assets */ = {isa = PBXFileReference; lastKnownFileType = folder; name = assets; path = ../../assets; sourceTree = "<group>"; };
 		C99F60651E34FE8F0064B563 /* OCamlTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OCamlTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		C99F60691E34FE8F0064B563 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		C99F606B1E34FE8F0064B563 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -123,6 +125,7 @@
 		C99F60671E34FE8F0064B563 /* OCamlTest */ = {
 			isa = PBXGroup;
 			children = (
+				7F9E37371FD33F3D00E18358 /* assets */,
 				7F0CA81B1FC3E2C000AB7F3D /* reason-logo.png */,
 				7F0CA8151FC3D82A00AB7F3D /* flappy.fnt */,
 				7F0CA8141FC3D82A00AB7F3D /* flappy.png */,
@@ -246,6 +249,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				7F9E37381FD33F3D00E18358 /* assets in Resources */,
 				7F3824CF1FC13D5800CB54CC /* flappy-base.png in Resources */,
 				43C88D2F1E3B340C002BA291 /* Shader.fsh in Resources */,
 				7F3824D11FC1462200CB54CC /* background.png in Resources */,

@@ -46,6 +46,8 @@
 # > process attach --name OCamlTest
 #
 
+BSB_BACKEND = native-ios
+
 CURDIR = $(shell pwd)
 
 # This section is for simulator. Uncomment the next section to build to device
@@ -109,8 +111,8 @@ TOOLDIR = $(HIDEOUT)/Toolchains/XcodeDefault.xctoolchain/usr/bin
 
 CC = $(TOOLDIR)/clang -arch $(ARCH)
 CFLAGS = -isysroot $(PLT)$(SDK) -isystem $(OCAMLDIR)/lib/ocaml -DCAML_NAME_SPACE -I$(CURDIR)/OCamlTest/OCamlTest -I$(OCAMLDIR)/lib/ocaml/caml -I$(OCAMLDIR)/lib/ocaml -I$(OCAMLDIR)/../stdlib/ -fno-objc-arc -miphoneos-version-min=$(IOSMINREV)
-OCAMLOPT = $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -I $(CURDIR) -no-alias-deps -ccopt -isysroot -ccopt $(PLT)$(SDK)
-MLFLAGS = -c -I Build/src -I Build/reasongl-interface/src -I Build/reprocessing/src -I $(OCAMLDIR)/lib/ocaml bigarray.cmxa
+OCAMLOPT = BSB_BACKEND=$(BSB_BACKEND) $(OCAMLBIN)/bin/ocamlopt -pp 'refmt --print binary' -ppx ./matchenv.ppx -I $(CURDIR) -no-alias-deps -ccopt -isysroot -ccopt $(PLT)$(SDK)
+MLFLAGS = -c -I Build/src -I Build/app -I Build/reasongl-interface/src -I Build/reprocessing/src -I $(OCAMLDIR)/lib/ocaml bigarray.cmxa
 
 C_FILES = CTgls CBindings bigarray_stubs mmap_unix
 REASONGL_INTERFACE_FILES = RGLConstants RGLEvents RGLInterface ReasonglInterface
@@ -134,6 +136,9 @@ app:: TestApp
 
 build:: TestApp deploy-simulator
 
+matchenv.ppx:
+	ocamlc -pp 'refmt --print binary' -I +compiler-libs ocamlcommon.cma -impl matchenv/src/index.re -o matchenv.ppx
+
 reason-watch:
 	# Brew install watchexec if you don't have it https://github.com/mattgreen/watchexec
 	watchexec -w src $(MAKE) TestReason
@@ -151,7 +156,7 @@ deploy-simulator:
 	## Launch the app without deps on ios-deploy
 	xcrun simctl launch --console booted $(BUNDLE_ID)
 
-TestReason: Build $(C_FILES_PATH) $(RE_FILES_PATH)
+TestReason: matchenv.ppx Build $(C_FILES_PATH) $(RE_FILES_PATH)
 		$(OCAMLOPT) bigarray.cmxa $(C_FILES_PATH) $(RE_FILES_PATH) -output-obj -o Build/re_output.o
 		cp $(OCAMLDIR)/lib/ocaml/libasmrun.a Build/libGobi.a
 		ar -r Build/libGobi.a $(C_FILES_PATH) Build/re_output.o
@@ -172,7 +177,7 @@ Build:
 
 clean::
 		rm -f TestApp *.o *.cm[iox]
-		rm -rf Build/src/* Build/Products Build/libGobi.a Build/reasongl-interface/src/* Build/reprocessing/src/*
+		rm -rf Build/src/* Build/app/* Build/Products Build/libGobi.a Build/reasongl-interface/src/* Build/reprocessing/src/*
 
 Build/src/bigarray_stubs.o: src/bigarray_stubs.c
 		cp $< Build/$<

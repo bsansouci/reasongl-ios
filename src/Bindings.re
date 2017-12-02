@@ -33,3 +33,4 @@ external getView : gameViewControllerT => _GLKViewT = "getGLKView";
 
 external loadImage : (~filename: string) => option('a) = "loadImage";
 external loadFile : (~filename: string) => option(string) = "loadFile";
+external getTimeMs : unit => float = "getTimeMs";

@@ -93,7 +93,6 @@ char id=123 x=155 y=29 width=9 height=30 xoffset=1 yoffset=2 xadvance=11 page=0 
 char id=125 x=159 y=62 width=9 height=30 xoffset=1 yoffset=2 xadvance=11 page=0 chnl=15
 char id=91 x=190 y=201 width=7 height=30 xoffset=2 yoffset=2 xadvance=9 page=0 chnl=15
 char id=93 x=200 y=201 width=7 height=30 xoffset=1 yoffset=2 xadvance=9 page=0 chnl=15
-char id=32 x=0 y=0 width=0 height=0 xoffset=1 yoffset=2 xadvance=9 page=0 chnl=15
 kernings count=97
 kerning first=32 second=65 amount=-2
 kerning first=32 second=84 amount=-1

@@ -78,7 +78,7 @@ let module Gl
     }
   };
 
-  let getTimeMs = () => Unix.gettimeofday() *. 1000.;
+  /* let getTimeMs = () => 0.; */
   let render = (~window, ~mouseDown=?, ~mouseUp=?, ~mouseMove=?, ~keyDown=?, ~keyUp=?, ~windowResize=?, ~displayFunc, ()) => {
     Callback.register("reasonglUpdate", (time) => displayFunc(time *. 1000.));
     Callback.register("reasonglTouchDrag", switch mouseMove {

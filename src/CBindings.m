@@ -70,6 +70,11 @@ static value unboxed(GLuint i) {
 
 /** These are unique to ios */
 
+CAMLprim getTimeMs() {
+  CAMLparam0();
+  CAMLreturn(caml_copy_double([[NSDate date] timeIntervalSince1970] * 1000.0));
+}
+
 void setContext(value s, value c) {
   id s2 = (id)(void *)Field(s, 0);
   GameViewController *game = (GameViewController *)s2;
