@@ -6,7 +6,10 @@ let module Gl
   include Tgls;
 
   let target = "native-ios";
-  module type FileT = {type t; let readFile: (~filename: string, ~cb: string => unit) => unit;};
+  module type FileT = {type t; let readFile: (~filename: string, ~cb: string => unit) => unit;
+    let saveUserData: (~key: string, ~value: 'a) => bool;
+    let loadUserData: (~key: string) => option('a);
+  };
   module File: FileT = {
     type t;
     let readFile = (~filename, ~cb) => {
@@ -15,6 +18,8 @@ let module Gl
       | Some(text) => cb(text)
       }
     };
+    let loadUserData = (~key) => None;
+    let saveUserData = (~key, ~value) => false;
   };
 
   module type WindowT = {
@@ -24,7 +29,7 @@ let module Gl
     let getPixelWidth: t => int;
     let getPixelHeight: t => int;
     let getPixelScale: t => float;
-    let init: (~argv: array(string), (t) => unit) => unit;
+    let init: (~title: string=?, ~argv: array(string), (t) => unit) => unit;
     let setWindowSize: (~window: t, ~width: int, ~height: int) => unit;
     let getContext: t => contextT;
   };
@@ -49,7 +54,7 @@ let module Gl
     };
 
     let getContext = ({context}) => context;
-    let init = (~argv: array(string), cb) => {
+    let init = (~title=?, ~argv: array(string), cb) => {
       Callback.register("reasonglMain", (vc: gameViewControllerT) => {
         switch (makeContext(EAGLRenderingAPIOpenGLES2)) {
         | None => failwith("Unable to setup OpenGL rendering context :(")
@@ -73,6 +78,7 @@ let module Gl
     }
   };
 
+  let getTimeMs = () => Unix.gettimeofday() *. 1000.;
   let render = (~window, ~mouseDown=?, ~mouseUp=?, ~mouseMove=?, ~keyDown=?, ~keyUp=?, ~windowResize=?, ~displayFunc, ()) => {
     Callback.register("reasonglUpdate", (time) => displayFunc(time *. 1000.));
     Callback.register("reasonglTouchDrag", switch mouseMove {

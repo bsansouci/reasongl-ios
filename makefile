@@ -116,15 +116,18 @@ C_FILES = CTgls CBindings bigarray_stubs mmap_unix
 REASONGL_INTERFACE_FILES = RGLConstants RGLEvents RGLInterface ReasonglInterface
 REASONGL_FILES = GLConstants Bindings Tgls Reasongl
 REPROCESSING_FILES = Reprocessing_Events Reprocessing_Common Reprocessing_Constants Reprocessing_Matrix Reprocessing_Shaders Reprocessing_Internal Reprocessing_Font Reprocessing_Types Reprocessing_Utils Reprocessing_Hotreload Reprocessing_Env Reprocessing_Draw Reprocessing_ClientWrapper Reprocessing
-REPROCESSING_LITE_FILES = Reprocessing_lite Reprocessing_lite_Utils Reprocessing_lite_Draw
-APP_FILES= ${REPROCESSING_LITE_FILES} FlappyBird
+# REPROCESSING_LITE_FILES = Reprocessing_lite Reprocessing_lite_Utils Reprocessing_lite_Draw
+# APP_PATHS = $(shell ocamldep  -pp 'refmt --print binary' -ml-synonym .re -I app -sort app/*.re)
+APP_PATHS = app/DrawUtils.re app/MyUtils.re app/ScreenManager.re app/SharedTypes.re app/WelcomeScreen.re app/GravShared.re app/GravLevels.re app/GravDraw.re app/DoneScreen.re app/GravStep.re app/LevelPicker.re app/GravGame.re app/Main.re app/ios.re
+APP_FILES = $(basename $(notdir $(APP_PATHS)))
+# APP_FILES= ${GRAVITRON_NAMES}
 
 C_FILES_PATH=$(addprefix Build/src/, $(addsuffix .o, $(C_FILES)))
 RE_FILES_PATH=\
 	$(addprefix Build/reasongl-interface/src/, $(addsuffix .cmx, $(REASONGL_INTERFACE_FILES))) \
 	$(addprefix Build/src/, $(addsuffix .cmx, $(REASONGL_FILES))) \
 	$(addprefix Build/reprocessing/src/, $(addsuffix .cmx, $(REPROCESSING_FILES))) \
-	$(addprefix Build/src/, $(addsuffix .cmx, $(APP_FILES)))
+	$(addprefix Build/app/, $(addsuffix .cmx, $(APP_FILES)))
 
 
 app:: TestApp
