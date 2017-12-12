@@ -44,6 +44,7 @@ let module Gl
     let getPixelScale = (window) => 1.;
 
     let setWindowSize = (~window, ~width, ~height) => {
+      failwith("Unable to set window size");
       /* umm this can't happen.
       one thing we could do is have an "intrinsic size" and a "real size",
       and this makes it so we scale whatever they're drawing to the actual
