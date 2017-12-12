@@ -6,20 +6,20 @@ let module Gl
   include Tgls;
 
   let target = "native-ios";
-  module type FileT = {type t; let readFile: (~filename: string, ~cb: string => unit) => unit;
-    let saveUserData: (~key: string, ~value: 'a) => bool;
-    let loadUserData: (~key: string) => option('a);
+  module type FileT = {type t; let readFile: (~context: contextT, ~filename: string, ~cb: string => unit) => unit;
+    let saveUserData: (~context: contextT, ~key: string, ~value: 'a) => bool;
+    let loadUserData: (~context: contextT, ~key: string) => option('a);
   };
   module File: FileT = {
     type t;
-    let readFile = (~filename, ~cb) => {
+    let readFile = (~context, ~filename, ~cb) => {
       switch (loadFile(filename)) {
       | None => failwith("File not found in resources: " ++ filename)
       | Some(text) => cb(text)
       }
     };
-    let loadUserData = (~key) => None;
-    let saveUserData = (~key, ~value) => false;
+    let loadUserData = (~context, ~key) => None;
+    let saveUserData = (~context, ~key, ~value) => false;
   };
 
   module type WindowT = {
@@ -79,7 +79,7 @@ let module Gl
   };
 
   /* let getTimeMs = () => 0.; */
-  let render = (~window, ~mouseDown=?, ~mouseUp=?, ~mouseMove=?, ~keyDown=?, ~keyUp=?, ~windowResize=?, ~displayFunc, ()) => {
+  let render = (~window, ~mouseDown=?, ~mouseUp=?, ~mouseMove=?, ~keyDown=?, ~keyUp=?, ~windowResize=?, ~backPressed=?, ~displayFunc, ()) => {
     Callback.register("reasonglUpdate", (time) => displayFunc(time *. 1000.));
     Callback.register("reasonglTouchDrag", switch mouseMove {
     | None => (x, y) => ()
@@ -141,6 +141,22 @@ let module Gl
     ) =>
     Tgls.texImage2D_RGBA(~target, ~level, ~width, ~height, ~border, ~data);
 
+  let fillTextureWithColor = (~context: contextT, ~target: int, ~level: int,
+    ~red: int,
+    ~green: int,
+    ~blue: int,
+    ~alpha: int
+  ) =>
+    texImage2D_RGBA(
+      ~context,
+      ~target,
+      ~level,
+      ~width=1,
+      ~height=1,
+      ~border=0,
+      ~data=Bigarray.Array1.of_array(Bigarray.Int8_unsigned, Bigarray.c_layout, [|red, green, blue, alpha|])
+    );
+
   let drawElementsInstanced = (~context: contextT, ~mode: int, ~count: int, ~type_: int, ~indices: int, ~primcount: int) =>
     failwith("We're using opengles 2, which doesn't support drawElementsInstanced");
 
@@ -160,7 +176,7 @@ let module Gl
   let getImageWidth = (image) => image.width;
   let getImageHeight = (image) => image.height;
 
-  let loadImage = (~filename: string, ~loadOption=?, ~callback: option(imageT) => unit, unit) => {
+  let loadImage = (~context: contextT, ~filename: string, ~loadOption=?, ~callback: option(imageT) => unit, unit) => {
     callback(Bindings.loadImage(~filename))
   };
 
