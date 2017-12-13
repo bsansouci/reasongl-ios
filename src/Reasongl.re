@@ -36,15 +36,15 @@ let module Gl
 
   module Window: WindowT = {
     type t = {viewController: gameViewControllerT, context: contextT};
-    let getWidth = (window) => 375; /** TODO make general */
-    let getHeight = (window) => 667;
+    let getWidth = (window) => Bindings.getWidth(window.viewController);
+    let getHeight = (window) => Bindings.getHeight(window.viewController);
     /** TODO these are probably wrong */
     let getPixelWidth = (window) => getWidth(window);
     let getPixelHeight = (window) => getHeight(window);
     let getPixelScale = (window) => 1.;
 
     let setWindowSize = (~window, ~width, ~height) => {
-      failwith("Unable to set window size");
+      /* failwith("Unable to set window size"); */
       /* umm this can't happen.
       one thing we could do is have an "intrinsic size" and a "real size",
       and this makes it so we scale whatever they're drawing to the actual

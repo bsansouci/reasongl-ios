@@ -22,6 +22,8 @@ type _GLKViewT;
   "setPreferredFramesPerSecond";
 
 external getView : gameViewControllerT => _GLKViewT = "getGLKView";
+external getWidth : gameViewControllerT => int = "getWidth";
+external getHeight : gameViewControllerT => int = "getHeight";
 
 [@noalloc] external setDrawableDepthFormat : (_GLKViewT, _GLKViewDrawableDepthFormatT) => unit =
   "setDrawableDepthFormat";

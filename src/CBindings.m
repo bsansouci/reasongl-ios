@@ -70,7 +70,7 @@ static value unboxed(GLuint i) {
 
 /** These are unique to ios */
 
-CAMLprim getTimeMs() {
+CAMLprim value getTimeMs() {
   CAMLparam0();
   CAMLreturn(caml_copy_double([[NSDate date] timeIntervalSince1970] * 1000.0));
 }
@@ -111,6 +111,20 @@ CAMLprim value getGLKView(value s) {
   GameViewController *game = (GameViewController *)s2;
   GLKView *v = (GLKView *)game.view;
   CAMLreturn(oreturn(v));
+}
+
+CAMLprim value getWidth(value s) {
+  CAMLparam1(s);
+  id s2 = (id)(void *)Field(s, 0);
+  GameViewController *game = (GameViewController *)s2;
+  CAMLreturn(Val_int(game.view.bounds.size.width));
+}
+
+CAMLprim value getHeight(value s) {
+  CAMLparam1(s);
+  id s2 = (id)(void *)Field(s, 0);
+  GameViewController *game = (GameViewController *)s2;
+  CAMLreturn(Val_int(game.view.bounds.size.height));
 }
 
 void reasonglMain(GameViewController *viewController) {
