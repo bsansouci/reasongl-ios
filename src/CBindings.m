@@ -302,3 +302,36 @@ CAMLprim value loadImage(value filename) {
     CAMLreturn(Val_some(record_image_data));
   }
 }
+
+
+CAMLprim void saveData(value context, value key, value data) {
+  CAMLparam3(context, key, data);
+
+  NSData* nsData = [NSData dataWithBytes:String_val(data) length:caml_string_length(data)];
+  NSString* keyString = [NSString stringWithUTF8String:String_val(key)];
+  [[NSUserDefaults standardUserDefaults] setObject:nsData forKey:keyString];
+
+  CAMLreturn0;
+}
+
+CAMLprim value loadData(value ocamlWindow, value key) {
+  CAMLparam2(ocamlWindow, key);
+  CAMLlocal1(ml_data);
+
+  NSString* keyString = [NSString stringWithUTF8String:String_val(key)];
+  NSData* nsData = [[NSUserDefaults standardUserDefaults] dataForKey:keyString];
+
+  if (!nsData) {
+    CAMLreturn(Val_none);
+  } else {
+    int len = nsData.length;
+    // char buf[len];
+    // (*g_env)->GetByteArrayRegion(g_env, array, 0, len, (jbyte*)buf);
+
+    // from https://www.linux-nantes.org/~fmonnier/OCaml/ocaml-wrapping-c.html
+    ml_data = caml_alloc_string(len);
+    memcpy( String_val(ml_data), nsData.bytes, len );
+
+    CAMLreturn(Val_some(ml_data));
+  }
+}

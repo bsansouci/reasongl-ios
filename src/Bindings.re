@@ -36,3 +36,6 @@ external getHeight : gameViewControllerT => int = "getHeight";
 external loadImage : (~filename: string) => option('a) = "loadImage";
 external loadFile : (~filename: string) => option(string) = "loadFile";
 external getTimeMs : unit => float = "getTimeMs";
+
+external loadData : (~context: contextT, ~key: string) => option(bytes) = "loadData";
+external saveData : (~context: contextT, ~key: string, ~value: bytes) => unit = "saveData";

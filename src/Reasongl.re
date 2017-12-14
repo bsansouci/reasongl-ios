@@ -18,8 +18,23 @@ let module Gl
       | Some(text) => cb(text)
       }
     };
-    let loadUserData = (~context, ~key) => None;
-    let saveUserData = (~context, ~key, ~value) => false;
+    let loadUserData = (~context, ~key) => {
+      try {
+      switch(Bindings.loadData(~context, ~key)) {
+        | None => None
+        | Some(bytes) => {
+          Some(Marshal.from_bytes(bytes, 0))
+        }
+      }
+      } {
+        | _ => None
+      }
+    };
+    let saveUserData = (~context, ~key, ~value) => {
+      let text = Marshal.to_bytes(value, []);
+      Bindings.saveData(~context, ~key, ~value=text);
+      true
+    };
   };
 
   module type WindowT = {
